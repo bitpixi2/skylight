@@ -4,11 +4,6 @@ import type { ProjectionMode } from "./config.js";
 
 import { DEG, FT_TO_M, KT_TO_MS, MI_TO_M } from "./constants.js";
 
-/** Signed decimal degrees, e.g. `37.6213, -122.3790`. */
-export function formatLatLon(lat: number, lon: number): string {
-  return `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-}
-
 export interface Meters {
   east: number;
   north: number;

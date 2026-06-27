@@ -24,6 +24,11 @@ export function convertSpeed(gsKnots: number, unit: SpeedUnit): number {
 }
 
 /** Format a ground speed (knots in) as a rounded, unit-suffixed string. */
+
+/** Signed decimal degrees, e.g. `37.6213, -122.3790`. */
+export function formatLatLon(lat: number, lon: number): string {
+  return `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+}
 export function formatSpeed(gsKnots: number, unit: SpeedUnit): string {
   return `${Math.round(convertSpeed(gsKnots, unit))} ${SPEED_SUFFIX[unit]}`;
 }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Airport, Config, ShowFields, LocationProfile } from "@shared/index.js";
-import { formatLatLon } from "@shared/geo.js";
+import { formatLatLon } from "@shared/format.js";
 import { geoAvailability, geoErrorMessage } from "../lib/geolocation.js";
 import { useStream } from "../lib/useStream.js";
 import { nextISSPass, type Tle } from "../display/celestial.js";
