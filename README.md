@@ -9,24 +9,27 @@ This is a Melbourne-focused fork of [cpaczek/skylight](https://github.com/cpacze
 
 ## The display
 
-Brenton's Flight Deck alternates every 45 seconds between two live views:
+Brenton's Flight Deck alternates every 45 seconds between two wide live views:
 
-- **Airspace view** — a home-centred 70 km radar/map with live aircraft positions,
+- **Runway view** — a home-centred 70 km radar/map with live aircraft positions,
   compass rings, trails, and Melbourne Airport (MEL/YMML) runway context in its
   real geographic direction.
-- **Looking-up view** — an altitude-aware sky dome calculated from an approximate
+- **Overhead view** — an altitude-aware sky dome calculated from an approximate
   viewpoint in Victoria, with aircraft, stars, planets, the sun, moon, satellites,
   compass directions, and elevation rings in their current positions.
+- **Follow view** — select a live aircraft on the main field or in the lower strip
+  to centre an 18 km moving view on that aircraft until **Stop following** is pressed.
 
-The large **Airspace / Look up** touch control switches views immediately, and the
-**Expand** button takes the display fullscreen. The screen is divided into:
+The large **Runway / Overhead / Follow** touch control switches views immediately,
+the cursor remains visible in Kiosk 1, and the **Expand** button takes the display
+fullscreen. The screen is divided into:
 
 - a full-width header with Melbourne local time and live status;
 - a large live radar or sky view across the left side;
 - a current-weather card above the aircraft card on the right, showing details only
   when supplied by the live feeds; and
 - a lower strip with the next five aircraft by distance. Each tile is a button
-  that opens that aircraft in the right rail.
+  that centres and follows that aircraft while opening its details in the right rail.
 
 Airline SVGs are matched from the verified three-letter operator prefix in the
 aircraft callsign. If a callsign has no confident match, the display leaves the
@@ -89,8 +92,8 @@ Then open:
 
 - Display: `http://localhost:3000/?kiosk=1`
 - Minimal projector: `http://localhost:3000/?kiosk=2`
-- Fixed airspace view: `http://localhost:3000/?view=runway`
-- Fixed looking-up view: `http://localhost:3000/?view=sky`
+- Fixed runway view: `http://localhost:3000/?view=runway`
+- Fixed overhead view: `http://localhost:3000/?view=overhead`
 
 For development with hot reload:
 

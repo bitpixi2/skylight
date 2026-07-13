@@ -35,6 +35,7 @@ body,
   background:
     radial-gradient(circle at 34% 48%, rgba(27, 94, 102, 0.08), transparent 38%),
     linear-gradient(150deg, #010406 0%, #03090d 52%, #020609 100%);
+  cursor: default;
 }
 
 .display-root.projector-mode {
@@ -169,6 +170,11 @@ body,
   isolation: isolate;
 }
 
+.radar-panel.is-following {
+  border-color: rgba(117, 244, 189, 0.48);
+  box-shadow: inset 0 0 32px rgba(117, 244, 189, 0.035);
+}
+
 .radar-panel::after {
   content: "";
   position: absolute;
@@ -187,6 +193,10 @@ body,
   width: 100%;
   height: 100%;
   display: block;
+}
+
+.radar-panel.is-interactive .display-canvas {
+  cursor: crosshair;
 }
 
 .radar-heading {
@@ -277,6 +287,21 @@ body,
 
 .view-switch button:active {
   transform: scale(0.96);
+}
+
+.view-switch button:disabled {
+  color: #3f555c;
+  cursor: default;
+  opacity: 0.55;
+}
+
+.view-switch button:disabled i {
+  color: #3f555c;
+}
+
+.view-switch button:disabled:hover {
+  background: transparent;
+  box-shadow: none;
 }
 
 .view-switch button:focus-visible {

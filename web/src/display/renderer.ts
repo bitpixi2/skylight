@@ -193,6 +193,7 @@ interface Visible {
 export class Renderer {
   private ctx: CanvasRenderingContext2D;
   private tracks = new Map<string, Track>();
+  private hitTargets: { hex: string; x: number; y: number; radius: number }[] = [];
   private raf = 0;
   private dpr = 1;
   private w = 0;
@@ -265,6 +266,25 @@ export class Renderer {
 
   resetTracks(): void {
     this.tracks.clear();
+    this.hitTargets = [];
+  }
+
+  /** Return the aircraft glyph under a browser pointer, if any. */
+  pickAircraft(clientX: number, clientY: number): string | null {
+    const rect = this.canvas.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return null;
+    const x = (clientX - rect.left) * (this.w / rect.width);
+    const y = (clientY - rect.top) * (this.h / rect.height);
+    let match: string | null = null;
+    let closestDistance = Number.POSITIVE_INFINITY;
+    for (const target of this.hitTargets) {
+      const distance = Math.hypot(x - target.x, y - target.y);
+      if (distance <= target.radius && distance < closestDistance) {
+        match = target.hex;
+        closestDistance = distance;
+      }
+    }
+    return match;
   }
 
   resize(): void {
@@ -475,6 +495,12 @@ export class Renderer {
 
     // Nearest last so it paints on top.
     visible.sort((a, b) => b.rangeMi - a.rangeMi);
+    this.hitTargets = visible.map((v) => ({
+      hex: v.tr.ac.hex,
+      x: v.p.x,
+      y: v.p.y,
+      radius: Math.max(22, cfg.glyphSizePx * v.sizeScale * 1.7),
+    }));
 
     // Trails + glyphs for everyone.
     if (cfg.showDestArc) for (const v of visible) this.drawDestArc(cfg, proj, v);

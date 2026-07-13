@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type RefObject } from "react";
+import { useEffect, useMemo, useState, type MouseEventHandler, type RefObject } from "react";
 import {
   MI_TO_KM,
   RIDDELLS_CREEK_VIEWPOINT,
@@ -13,7 +13,8 @@ import { useNextIssPass } from "./useNextIssPass.js";
 import { useWeather } from "./useWeather.js";
 import { WeatherGlyph, weatherCondition } from "./WeatherGlyph.js";
 
-export type DeckView = "runway" | "sky";
+export type WideDeckView = "runway" | "overhead";
+export type DeckView = WideDeckView | "focus";
 
 const MELBOURNE_TIME = new Intl.DateTimeFormat("en-AU", {
   timeZone: "Australia/Melbourne",
@@ -43,10 +44,14 @@ interface FlightDeckProps {
   canvasRef: RefObject<HTMLCanvasElement>;
   state: StreamState;
   view: DeckView;
+  selectedHex: string | null;
   autoSwitching: boolean;
   fullscreenActive: boolean;
   onToggleFullscreen: () => void;
-  onSelectView?: (view: DeckView) => void;
+  onSelectView?: (view: WideDeckView) => void;
+  onSelectAircraft?: (hex: string) => void;
+  onClearSelection: () => void;
+  onCanvasClick?: MouseEventHandler<HTMLCanvasElement>;
 }
 
 interface NearbyFlight {
@@ -101,13 +106,16 @@ export function FlightDeck({
   canvasRef,
   state,
   view,
+  selectedHex,
   autoSwitching,
   fullscreenActive,
   onToggleFullscreen,
   onSelectView,
+  onSelectAircraft,
+  onClearSelection,
+  onCanvasClick,
 }: FlightDeckProps) {
   const [clock, setClock] = useState(() => Date.now());
-  const [selectedHex, setSelectedHex] = useState<string | null>(null);
   const { weather, unavailable: weatherUnavailable } = useWeather();
   const nextIssPass = useNextIssPass();
 
@@ -141,6 +149,7 @@ export function FlightDeck({
     ? airborneFlights.find(({ aircraft }) => aircraft.hex === selectedHex) ?? closest
     : closest;
   const isSelected = selectedHex != null && selectedFlight?.aircraft.hex === selectedHex;
+  const isFollowing = view === "focus" && isSelected;
   const feedLive = state.connected && (state.status?.ok ?? true);
   const currentWeather = weather?.current;
   const condition = currentWeather
@@ -173,12 +182,32 @@ export function FlightDeck({
       </header>
 
       <main className="deck-main-grid">
-        <section className="radar-panel" aria-label={view === "sky" ? "Looking-up sky view" : "Home-centred airspace view"}>
-          <canvas ref={canvasRef} className="display-canvas" />
+        <section
+          className={`radar-panel${onCanvasClick ? " is-interactive" : ""}${isFollowing ? " is-following" : ""}`}
+          aria-label={view === "overhead"
+            ? "Looking-up overhead sky view"
+            : view === "focus"
+              ? "Aircraft-following view"
+              : "Runway airspace view"}
+        >
+          <canvas
+            ref={canvasRef}
+            className="display-canvas"
+            aria-label="Live aircraft field. Click an aircraft to follow it."
+            onClick={onCanvasClick}
+          />
           <div className="radar-heading">
             <div>
-              <strong>{view === "sky" ? "Looking up · Local sky" : "Home-centred airspace · 70 km"}</strong>
-              <span>{view === "sky" ? "Live sky positions and elevation" : "Live positions · refreshed every 3 seconds"}</span>
+              <strong>{view === "overhead"
+                ? "Overhead · Looking up"
+                : view === "focus"
+                  ? `Following · ${selectedAircraft ? flightName(selectedAircraft) : "Aircraft"}`
+                  : "Runway view · 70 km"}</strong>
+              <span>{view === "overhead"
+                ? "Live sky positions and elevation"
+                : view === "focus"
+                  ? "Aircraft-centred live view · updates with every position"
+                  : "Live positions · YMML runway context · refreshed every 3 seconds"}</span>
             </div>
             <div className="radar-controls">
               {onSelectView && (
@@ -190,18 +219,28 @@ export function FlightDeck({
                       aria-pressed={view === "runway"}
                       onClick={() => onSelectView("runway")}
                     >
-                      <i aria-hidden="true">◎</i> Airspace
+                      <i aria-hidden="true">⌁</i> Runway
                     </button>
                     <button
                       type="button"
-                      className={view === "sky" ? "is-active" : ""}
-                      aria-pressed={view === "sky"}
-                      onClick={() => onSelectView("sky")}
+                      className={view === "overhead" ? "is-active" : ""}
+                      aria-pressed={view === "overhead"}
+                      onClick={() => onSelectView("overhead")}
                     >
-                      <i aria-hidden="true">⌃</i> Look up
+                      <i aria-hidden="true">⌃</i> Overhead
+                    </button>
+                    <button
+                      type="button"
+                      className={view === "focus" ? "is-active" : ""}
+                      aria-pressed={view === "focus"}
+                      disabled={!selectedAircraft || !onSelectAircraft}
+                      onClick={() => selectedAircraft && onSelectAircraft?.(selectedAircraft.hex)}
+                      title={selectedAircraft ? `Follow ${flightName(selectedAircraft)}` : "No aircraft available to follow"}
+                    >
+                      <i aria-hidden="true">⌖</i> Follow
                     </button>
                   </div>
-                  {autoSwitching && <small>Auto-switches every 45s</small>}
+                  <small>{autoSwitching ? "Runway / overhead auto-switch every 45s" : "Click any aircraft to follow"}</small>
                 </div>
               )}
               <button
@@ -221,7 +260,8 @@ export function FlightDeck({
             {currentWeather && (
               <span>Home wind · {windDirection(currentWeather.windDirectionDeg)} {Math.round(currentWeather.windKt)} kt</span>
             )}
-            <span>{view === "sky" ? "Look-up dome" : "YMML runway context"}</span>
+            <span>{view === "overhead" ? "Look-up dome" : view === "focus" ? "Aircraft-centred · 18 km" : "YMML runway context"}</span>
+            {onSelectAircraft && <span>Click a plane to follow</span>}
             <span>{airborneFlights.length} aircraft in view</span>
           </div>
         </section>
@@ -259,15 +299,15 @@ export function FlightDeck({
             )}
           </section>
 
-          <section className="closest-card" aria-label={isSelected ? "Selected live aircraft" : "Closest live aircraft"}>
+          <section className="closest-card" aria-label={isFollowing ? "Following live aircraft" : isSelected ? "Selected live aircraft" : "Closest live aircraft"}>
             {selectedFlight && selectedAircraft ? (
               <>
                 <div className="closest-heading">
-                  <span>{isSelected ? "Selected aircraft" : "Closest aircraft"}</span>
+                  <span>{isFollowing ? "Following aircraft" : isSelected ? "Selected aircraft" : "Closest aircraft"}</span>
                   <div className="closest-actions">
                     <b>{selectedFlight.distanceKm.toFixed(1)} km</b>
                     {isSelected && (
-                      <button type="button" onClick={() => setSelectedHex(null)}>Show nearest</button>
+                      <button type="button" onClick={onClearSelection}>{isFollowing ? "Stop following" : "Show nearest"}</button>
                     )}
                   </div>
                 </div>
@@ -328,7 +368,7 @@ export function FlightDeck({
       <section className="next-strip" aria-label="Next five nearby aircraft">
         <div className="strip-intro">
           <strong>Next five</strong>
-          <span>Tap any flight to inspect it in the right rail</span>
+          <span>Tap any flight to centre it and follow its live position</span>
         </div>
         <div className="strip-flights">
           {nextFive.length ? nextFive.map(({ aircraft, distanceKm }) => {
@@ -339,8 +379,8 @@ export function FlightDeck({
                 className={`strip-flight ${selectedHex === aircraft.hex ? "is-selected" : ""}`}
                 key={aircraft.hex}
                 aria-pressed={selectedHex === aircraft.hex}
-                aria-label={`Show details for ${flightName(aircraft)}`}
-                onClick={() => setSelectedHex(aircraft.hex)}
+                aria-label={`Follow ${flightName(aircraft)}`}
+                onClick={() => onSelectAircraft?.(aircraft.hex)}
               >
                 <span className="strip-flight-heading">
                   {airline && <AirlineLogo airline={airline} variant="icon" />}
