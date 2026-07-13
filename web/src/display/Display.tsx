@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Config, Theme } from "@shared/index.js";
 import {
   DEFAULT_CONFIG,
-  NM_PER_MILE,
+  MI_TO_KM,
   RIDDELLS_CREEK_VIEWPOINT,
   formatDistance,
 } from "@shared/index.js";
@@ -13,12 +13,28 @@ import { Renderer } from "./renderer.js";
 
 const THEMES: Theme[] = ["ambient", "telemetry", "focus"];
 const VIEW_SECONDS = 45;
+const HOME_RADIUS_MILES = 50 / MI_TO_KM;
+const RIDDELLS_AIRSPACE_CONFIG: Config = {
+  ...DEFAULT_CONFIG,
+  centerLat: RIDDELLS_CREEK_VIEWPOINT.lat,
+  centerLon: RIDDELLS_CREEK_VIEWPOINT.lon,
+  locationName: RIDDELLS_CREEK_VIEWPOINT.name,
+  radiusMiles: HOME_RADIUS_MILES,
+  projectionMode: "map",
+  mirrorX: false,
+  showAirport: true,
+  showStars: false,
+  showSun: false,
+  showMoon: false,
+  showSatellites: false,
+  showPlanets: false,
+};
 const RIDDELLS_SKY_CONFIG: Config = {
   ...DEFAULT_CONFIG,
   centerLat: RIDDELLS_CREEK_VIEWPOINT.lat,
   centerLon: RIDDELLS_CREEK_VIEWPOINT.lon,
   locationName: RIDDELLS_CREEK_VIEWPOINT.name,
-  radiusMiles: 25 / NM_PER_MILE,
+  radiusMiles: HOME_RADIUS_MILES,
   projectionMode: "sky",
   showAirport: false,
 };
@@ -39,8 +55,8 @@ export function Display() {
 
   const forcedView = new URLSearchParams(window.location.search).has("view");
   const personalDeck = state.hosted || forcedView;
-  const displayConfig = personalDeck && deckView === "sky"
-    ? RIDDELLS_SKY_CONFIG
+  const displayConfig = personalDeck
+    ? deckView === "sky" ? RIDDELLS_SKY_CONFIG : RIDDELLS_AIRSPACE_CONFIG
     : (state.config ?? DEFAULT_CONFIG);
 
   // Keep the latest config in a ref so the RAF loop always reads fresh values.
@@ -138,12 +154,11 @@ export function Display() {
   const cfg = displayConfig;
   return (
     <div className="display-root">
-      <canvas ref={canvasRef} className="display-canvas" />
       <FlightDeck
+        canvasRef={canvasRef}
         state={state}
         view={personalDeck ? deckView : cfg.projectionMode === "sky" ? "sky" : "runway"}
         autoSwitching={state.hosted}
-        trafficRadiusNm={personalDeck ? 25 : state.nearbyRadiusNm}
         onToggleView={personalDeck
           ? () => setDeckView((current) => current === "runway" ? "sky" : "runway")
           : undefined}

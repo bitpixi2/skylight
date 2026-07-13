@@ -39,8 +39,6 @@ import {
   greatCircleMiles,
   routePlausible,
   FT_TO_M,
-  KM_TO_M,
-  MI_TO_M,
   type Aircraft,
   type Config,
   type GroundSample,
@@ -568,8 +566,10 @@ export class Renderer {
           ctx.fillText(`${elev}°`, cx + r + 4, cy);
         }
       } else {
-        for (let step = 1; step <= Math.floor(convertDistance(cfg.radiusMiles, cfg.distanceUnit)); step++) {
-          const r = step * (cfg.distanceUnit === "mi" ? MI_TO_M : KM_TO_M) * proj.pxPerM;
+        const maxDistance = convertDistance(cfg.radiusMiles, cfg.distanceUnit);
+        const ringCount = maxDistance > 10 ? 5 : Math.max(1, Math.floor(maxDistance));
+        for (let step = 1; step <= ringCount; step++) {
+          const r = (step / ringCount) * this.horizonM(cfg) * proj.pxPerM;
           ctx.beginPath();
           ctx.arc(cx, cy, r, 0, Math.PI * 2);
           ctx.strokeStyle = rgba(hexToRgb(cfg.palette.grid), 0.5 * cfg.brightness);
@@ -622,7 +622,7 @@ export class Renderer {
   // --- airport: runways at true geographic position ---
   private drawAirport(cfg: Config, proj: ProjOpts): void {
     const ctx = this.ctx;
-    const rwyRgb: [number, number, number] = [150, 180, 220];
+    const rwyRgb: [number, number, number] = [224, 185, 92];
     {
       const ap = cfg.airport;
       let cx = 0;
@@ -632,19 +632,19 @@ export class Renderer {
         const a = this.toScreen(r.le, cfg, proj);
         const b = this.toScreen(r.he, cfg, proj);
         // True runway width in px, nudged up a touch so it stays legible.
-        const wpx = Math.max(2.5, r.widthFt * FT_TO_M * proj.pxPerM * 1.4);
+        const wpx = Math.max(3.5, r.widthFt * FT_TO_M * proj.pxPerM * 1.4);
 
         ctx.save();
         ctx.lineCap = "butt";
         // Asphalt body.
-        ctx.strokeStyle = rgba(rwyRgb, 0.16 * cfg.brightness);
+        ctx.strokeStyle = rgba(rwyRgb, 0.42 * cfg.brightness);
         ctx.lineWidth = wpx;
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
         ctx.lineTo(b.x, b.y);
         ctx.stroke();
         // Dashed centerline.
-        ctx.strokeStyle = rgba([210, 226, 255], 0.22 * cfg.brightness);
+        ctx.strokeStyle = rgba([255, 231, 168], 0.55 * cfg.brightness);
         ctx.lineWidth = 1;
         ctx.setLineDash([6, 6]);
         ctx.beginPath();
@@ -662,8 +662,8 @@ export class Renderer {
         cx /= n;
         cy /= n;
         ctx.save();
-        ctx.font = `300 13px ${cfg.fonts.label}`;
-        ctx.fillStyle = rgba(rwyRgb, 0.5 * cfg.brightness);
+        ctx.font = `700 12px ${cfg.fonts.mono}`;
+        ctx.fillStyle = rgba(rwyRgb, 0.8 * cfg.brightness);
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         try {

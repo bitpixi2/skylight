@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type RefObject } from "react";
 import {
-  NM_PER_MILE,
+  MI_TO_KM,
   RIDDELLS_CREEK_VIEWPOINT,
   llToMeters,
   metersToMiles,
@@ -8,6 +8,7 @@ import {
   type Aircraft,
 } from "@shared/index.js";
 import type { StreamState } from "../lib/connection.js";
+import { useNextIssPass } from "./useNextIssPass.js";
 import { useWeather } from "./useWeather.js";
 
 export type DeckView = "runway" | "sky";
@@ -16,50 +17,37 @@ const MELBOURNE_TIME = new Intl.DateTimeFormat("en-AU", {
   timeZone: "Australia/Melbourne",
   hour: "2-digit",
   minute: "2-digit",
-  second: "2-digit",
   hour12: false,
+  timeZoneName: "short",
 });
 
 const MELBOURNE_DATE = new Intl.DateTimeFormat("en-AU", {
   timeZone: "Australia/Melbourne",
-  weekday: "short",
+  weekday: "long",
   day: "2-digit",
   month: "long",
+  year: "numeric",
 });
 
-const UTC_TIME = new Intl.DateTimeFormat("en-AU", {
-  timeZone: "UTC",
+const ISS_TIME = new Intl.DateTimeFormat("en-AU", {
+  timeZone: "Australia/Melbourne",
+  weekday: "short",
   hour: "2-digit",
   minute: "2-digit",
-  second: "2-digit",
   hour12: false,
 });
 
 interface FlightDeckProps {
+  canvasRef: RefObject<HTMLCanvasElement>;
   state: StreamState;
   view: DeckView;
   autoSwitching: boolean;
-  trafficRadiusNm: number;
   onToggleView?: () => void;
 }
 
 interface NearbyFlight {
   aircraft: Aircraft;
-  distanceNm: number;
-}
-
-function weatherDescription(code: number): string {
-  if (code === 0) return "Clear";
-  if (code <= 2) return "Partly cloudy";
-  if (code === 3) return "Overcast";
-  if (code === 45 || code === 48) return "Fog";
-  if (code >= 51 && code <= 57) return "Drizzle";
-  if (code >= 61 && code <= 67) return "Rain";
-  if (code >= 71 && code <= 77) return "Snow";
-  if (code >= 80 && code <= 82) return "Showers";
-  if (code >= 85 && code <= 86) return "Snow showers";
-  if (code >= 95) return "Thunderstorm";
-  return "Current conditions";
+  distanceKm: number;
 }
 
 function windDirection(degrees: number): string {
@@ -71,21 +59,46 @@ function flightName(aircraft: Aircraft): string {
   return aircraft.flight || aircraft.registration || aircraft.hex.toUpperCase();
 }
 
-function flightDetail(aircraft: Aircraft): string {
-  const details: string[] = [];
-  if (aircraft.typeCode) details.push(aircraft.typeCode);
-  if (aircraft.onGround) details.push("GND");
-  else {
-    const altitude = aircraft.altBaro ?? aircraft.altGeom;
-    if (altitude != null) details.push(`${(Math.round(altitude / 100) * 100).toLocaleString()} ft`);
-  }
-  if (aircraft.gs != null) details.push(`${Math.round(aircraft.gs)} kt`);
-  return details.join(" · ") || "Position received";
+function aircraftName(aircraft: Aircraft): string {
+  return aircraft.typeName || aircraft.typeCode || "Aircraft";
 }
 
-export function FlightDeck({ state, view, autoSwitching, trafficRadiusNm, onToggleView }: FlightDeckProps) {
+function altitudeText(aircraft: Aircraft): string | null {
+  const altitude = aircraft.altBaro ?? aircraft.altGeom;
+  return altitude == null ? null : `${(Math.round(altitude / 100) * 100).toLocaleString()} ft`;
+}
+
+function verticalText(rate: number): string {
+  const rounded = Math.round(rate / 10) * 10;
+  return `${rounded > 0 ? "+" : ""}${rounded.toLocaleString()} ft/min`;
+}
+
+function movementText(aircraft: Aircraft): string {
+  const rate = aircraft.baroRate ?? 0;
+  if (rate > 250) return "Climbing";
+  if (rate < -250) return "Descending";
+  return "Level";
+}
+
+function trackText(track: number): string {
+  return `${Math.round(track).toString().padStart(3, "0")}° ${windDirection(track)}`;
+}
+
+function directionArrow(track: number | undefined): string {
+  if (track == null) return "·";
+  return ["↑", "↗", "→", "↘", "↓", "↙", "←", "↖"][Math.round(track / 45) % 8];
+}
+
+export function FlightDeck({
+  canvasRef,
+  state,
+  view,
+  autoSwitching,
+  onToggleView,
+}: FlightDeckProps) {
   const [clock, setClock] = useState(() => Date.now());
-  const { weather, unavailable: weatherUnavailable } = useWeather();
+  const { weather } = useWeather();
+  const nextIssPass = useNextIssPass();
 
   useEffect(() => {
     const timer = setInterval(() => setClock(Date.now()), 1000);
@@ -104,99 +117,141 @@ export function FlightDeck({ state, view, autoSwitching, trafficRadiusNm, onTogg
         );
         return {
           aircraft,
-          distanceNm: metersToMiles(rangeMeters(local)) * NM_PER_MILE,
+          distanceKm: metersToMiles(rangeMeters(local)) * MI_TO_KM,
         };
       })
-      .sort((a, b) => a.distanceNm - b.distanceNm)
-      .slice(0, 5);
+      .sort((a, b) => a.distanceKm - b.distanceKm);
   }, [state.nearbyAircraft]);
 
-  const airborneCount = state.nearbyAircraft.filter((aircraft) => !aircraft.onGround).length;
+  const airborneFlights = nearbyFlights.filter(({ aircraft }) => !aircraft.onGround);
+  const closest = airborneFlights[0] ?? null;
+  const nextFive = airborneFlights.slice(1, 6);
   const feedAgeSec = state.now ? Math.max(0, Math.round((clock - state.now) / 1000)) : null;
   const feedLive = state.connected && (state.status?.ok ?? true);
-  const current = weather?.current;
+  const currentWeather = weather?.current;
+  const closestAircraft = closest?.aircraft;
+  const verifiedRoute = closestAircraft?.origin && closestAircraft?.destination
+    ? { origin: closestAircraft.origin, destination: closestAircraft.destination }
+    : null;
 
   return (
-    <aside className="flight-deck" aria-label="Brenton's Flight Deck live information">
-      <header className="deck-header">
-        <div className="deck-airport-row">
-          <span>{view === "sky" ? "RIDDELLS CREEK" : "MEL / YMML"}</span>
-          <span className={`deck-live ${feedLive ? "is-live" : "is-offline"}`}>
-            <i aria-hidden="true" /> {feedLive ? `LIVE${feedAgeSec != null ? ` · ${feedAgeSec}s` : ""}` : "RECONNECTING"}
+    <>
+      <header className="deck-topbar">
+        <div className="deck-brand">
+          <h1>Brenton's Flight Deck</h1>
+          <p>
+            Melbourne airspace
+            <span className={`deck-live ${feedLive ? "is-live" : "is-offline"}`}>
+              <i aria-hidden="true" /> {feedLive ? "Live" : "Reconnecting"}
+            </span>
+          </p>
+        </div>
+        <div className="deck-status">
+          <div className="deck-time">
+            <time dateTime={new Date(clock).toISOString()}>{MELBOURNE_TIME.format(clock)}</time>
+            <span>{MELBOURNE_DATE.format(clock)}</span>
+          </div>
+          <span className={`feed-badge ${feedLive ? "is-live" : "is-offline"}`}>
+            <i aria-hidden="true" /> {feedLive ? `Feed connected${feedAgeSec != null ? ` · ${feedAgeSec}s` : ""}` : "Feed reconnecting"}
           </span>
         </div>
-        <h1>Brenton's<br />Flight Deck</h1>
-        <div className="deck-location-row">
-          <p>{view === "sky" ? "Looking up · Riddells Creek" : "Runway view · Melbourne Airport"}</p>
-          {onToggleView && (
-            <button type="button" onClick={onToggleView} aria-label={`Switch to ${view === "sky" ? "runway" : "looking up"} view`}>
-              {view === "sky" ? "Runway" : "Look up"} <span aria-hidden="true">↗</span>
-            </button>
-          )}
-        </div>
-        {autoSwitching && <span className="deck-auto">Auto-switching every 45 seconds</span>}
       </header>
 
-      <section className="deck-clock" aria-label="Current time">
-        <time dateTime={new Date(clock).toISOString()}>{MELBOURNE_TIME.format(clock)}</time>
-        <div>
-          <span>{MELBOURNE_DATE.format(clock)}</span>
-          <span>{UTC_TIME.format(clock)} UTC</span>
-        </div>
-      </section>
+      <main className="deck-main-grid">
+        <section className="radar-panel" aria-label={view === "sky" ? "Looking-up sky view" : "Home-centred airspace view"}>
+          <canvas ref={canvasRef} className="display-canvas" />
+          <div className="radar-heading">
+            <div>
+              <strong>{view === "sky" ? "Looking up · Brenton's Home" : "Home-centred airspace · 50 km"}</strong>
+              <span>{view === "sky" ? "Live sky positions and elevation" : "Live positions · refreshed every 3 seconds"}</span>
+            </div>
+            {onToggleView && (
+              <button type="button" onClick={onToggleView} aria-label={`Switch to ${view === "sky" ? "airspace" : "looking-up"} view`}>
+                {view === "sky" ? "Airspace" : "Look up"}
+                {autoSwitching && <small>Auto · 45s</small>}
+              </button>
+            )}
+          </div>
+          {view === "runway" && (
+            <div className="home-marker" aria-label="Approximate Brenton's Home viewpoint">
+              <i aria-hidden="true" />
+              <span>Brenton's Home</span>
+            </div>
+          )}
+          <div className="radar-badges" aria-label="Current map context">
+            {currentWeather && (
+              <span>Home wind · {windDirection(currentWeather.windDirectionDeg)} {Math.round(currentWeather.windKt)} kt</span>
+            )}
+            <span>{view === "sky" ? "Look-up dome" : "YMML runway context"}</span>
+            <span>{airborneFlights.length} aircraft in view</span>
+          </div>
+        </section>
 
-      <section className="deck-section deck-weather" aria-label="Current Riddells Creek weather">
-        <div className="deck-section-heading">
-          <span>Riddells Creek weather</span>
-          <span>WX · 15 MIN MODEL</span>
-        </div>
-        {current ? (
-          <>
-            <div className="weather-main">
-              <strong>{Math.round(current.temperatureC)}°</strong>
+        <aside className="closest-card" aria-label="Closest live aircraft">
+          {closest && closestAircraft ? (
+            <>
+              <div className="closest-heading">
+                <span>Closest aircraft</span>
+                <b>{closest.distanceKm.toFixed(1)} km</b>
+              </div>
+              <h2>{flightName(closestAircraft)}</h2>
+              {closestAircraft.airline && <p className="closest-airline">{closestAircraft.airline}</p>}
+
+              <dl className="aircraft-identity">
+                <div><dt>Aircraft</dt><dd>{aircraftName(closestAircraft)}</dd></div>
+                {closestAircraft.typeCode && <div><dt>Type</dt><dd>{closestAircraft.typeCode}</dd></div>}
+                {closestAircraft.registration && <div><dt>Registration</dt><dd>{closestAircraft.registration}</dd></div>}
+                {closestAircraft.track != null && <div><dt>Track</dt><dd>{trackText(closestAircraft.track)}</dd></div>}
+              </dl>
+
+              <dl className="aircraft-metrics">
+                {altitudeText(closestAircraft) && <div><dt>Altitude</dt><dd>{altitudeText(closestAircraft)}</dd></div>}
+                {closestAircraft.gs != null && <div><dt>Ground speed</dt><dd>{Math.round(closestAircraft.gs)} kt</dd></div>}
+                <div><dt>Distance</dt><dd>{closest.distanceKm.toFixed(1)} km</dd></div>
+                {closestAircraft.baroRate != null && <div><dt>Vertical</dt><dd>{verticalText(closestAircraft.baroRate)}</dd></div>}
+              </dl>
+
+              {verifiedRoute && (
+                <div className="verified-route">
+                  <span>Verified route</span>
+                  <div><b>{verifiedRoute.origin}</b><i aria-hidden="true" /><b>{verifiedRoute.destination}</b></div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="sky-idle">
+              <span>Sky watch</span>
+              <h2>Airspace quiet</h2>
+              <p>Stars, Moon, planets and satellites remain live in the looking-up view.</p>
               <div>
-                <b>{weatherDescription(current.weatherCode)}</b>
-                <span>Feels {Math.round(current.apparentC)}° · Cloud {Math.round(current.cloudPct)}%</span>
+                <small>Next ISS pass</small>
+                <strong>{nextIssPass ? ISS_TIME.format(nextIssPass) : "Calculating…"}</strong>
               </div>
             </div>
-            <div className="weather-grid">
-              <div><span>Wind</span><b>{windDirection(current.windDirectionDeg)} {Math.round(current.windKt)} kt</b></div>
-              <div><span>Gusts</span><b>{Math.round(current.gustKt)} kt</b></div>
-              <div><span>Humidity</span><b>{Math.round(current.humidityPct)}%</b></div>
-              <div><span>Pressure</span><b>{Math.round(current.pressureHpa)} hPa</b></div>
-            </div>
-          </>
-        ) : (
-          <div className="deck-placeholder">{weatherUnavailable ? "Weather temporarily unavailable" : "Loading local weather…"}</div>
-        )}
-      </section>
+          )}
+        </aside>
+      </main>
 
-      <section className="deck-section deck-traffic" aria-label="Live nearby aircraft">
-        <div className="deck-section-heading">
-          <span>Nearby traffic</span>
-          <span>{state.nearbyAircraft.length} IN {Math.round(trafficRadiusNm)} NM · {airborneCount} AIRBORNE</span>
+      <section className="next-strip" aria-label="Next five nearby aircraft">
+        <div className="strip-intro">
+          <strong>Next five</strong>
+          <span>Nearest aircraft by distance from Brenton's Home</span>
         </div>
-        {nearbyFlights.length ? (
-          <ol className="flight-list">
-            {nearbyFlights.map(({ aircraft, distanceNm }) => (
-              <li key={aircraft.hex}>
-                <div>
-                  <strong>{flightName(aircraft)}</strong>
-                  <span>{flightDetail(aircraft)}</span>
-                </div>
-                <b>{distanceNm.toFixed(1)} <small>NM</small></b>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <div className="deck-placeholder">Scanning local airspace…</div>
-        )}
+        <div className="strip-flights">
+          {nextFive.length ? nextFive.map(({ aircraft, distanceKm }) => (
+            <article key={aircraft.hex}>
+              <div><strong>{flightName(aircraft)}</strong><b aria-label="Direction of travel">{directionArrow(aircraft.track)}</b></div>
+              <span>{aircraftName(aircraft)}</span>
+              <footer>
+                <strong>{distanceKm.toFixed(1)} <small>km</small></strong>
+                <span>{altitudeText(aircraft) ?? "Altitude unavailable"}<br />{movementText(aircraft)}</span>
+              </footer>
+            </article>
+          )) : (
+            <div className="strip-idle">No additional airborne traffic inside 50 km.</div>
+          )}
+        </div>
       </section>
-
-      <footer>
-        <span>PUBLIC ADS-B</span>
-        <span>OPEN-METEO WX</span>
-      </footer>
-    </aside>
+    </>
   );
 }

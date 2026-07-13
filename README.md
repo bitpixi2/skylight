@@ -10,20 +10,25 @@ This is a Melbourne-focused fork of [cpaczek/skylight](https://github.com/cpacze
 
 Brenton's Flight Deck alternates every 45 seconds between two live views:
 
-- **Runway view** — a top-down plan of Melbourne Airport (MEL/YMML), including
-  its real runway geometry and aircraft moving through the immediate airport area.
+- **Airspace view** — a home-centred 50 km radar/map with live aircraft positions,
+  an approximate **Brenton's Home** marker, compass rings, trails, and Melbourne
+  Airport (MEL/YMML) runway context in its real geographic direction.
 - **Looking-up view** — an altitude-aware sky dome calculated from an approximate
   Riddells Creek viewpoint, with aircraft, stars, planets, the sun, moon, satellites,
   compass directions, and elevation rings in their current positions.
 
-The **Look up / Runway** button switches views immediately. The right-hand panel
-shows:
+The **Look up / Airspace** button switches views immediately. The TV-first screen
+is divided into:
 
-- live aircraft within 25 nautical miles of Riddells Creek;
-- callsign or registration, aircraft type, altitude, speed, and distance;
-- Riddells Creek temperature, cloud, wind, gusts, humidity, and pressure;
-- Melbourne local time and UTC; and
-- connection freshness and source status.
+- a full-width header with Melbourne local time and connection status;
+- a large live radar or sky view across the left side;
+- a closest-aircraft card on the right, showing route and aircraft details only
+  when supplied by the live feed; and
+- a lower strip with the next five aircraft by distance.
+
+When no aircraft is close, the side card switches to a quiet-sky state with the
+next calculated ISS pass while the looking-up view continues to show current
+celestial positions.
 
 Aircraft positions refresh about every three seconds, the clocks tick every second,
 and current weather is refreshed every five minutes from 15-minute model conditions.
@@ -61,7 +66,7 @@ DATA_SOURCE=api corepack pnpm start
 Then open:
 
 - Display: `http://localhost:3000/?kiosk=1`
-- Fixed runway view: `http://localhost:3000/?view=runway`
+- Fixed airspace view: `http://localhost:3000/?view=runway`
 - Fixed looking-up view: `http://localhost:3000/?view=sky`
 
 For development with hot reload:

@@ -6,7 +6,7 @@
 // sky plot without publishing a household or street-level position.
 const CENTER_LAT = -37.4587733;
 const CENTER_LON = 144.6776503;
-const API_RADIUS_NM = 25;
+const API_RADIUS_NM = 27;
 const UPSTREAM = `https://api.airplanes.live/v2/point/${CENTER_LAT}/${CENTER_LON}/${API_RADIUS_NM}`;
 
 function distanceMiles(lat1, lon1, lat2, lon2) {
@@ -66,8 +66,8 @@ export default async function handler(request, response) {
           distanceMiles(CENTER_LAT, CENTER_LON, a.lat, a.lon) -
           distanceMiles(CENTER_LAT, CENTER_LON, b.lat, b.lon),
       );
-    // Return the full area feed. The canvas applies the active view's own
-    // centre/radius filter: tight around MEL in runway mode, wide in sky mode.
+    // Return the full home-centred area feed. The canvas projects the same
+    // live positions into either the flat airspace view or the look-up sky.
     const aircraft = nearbyAircraft;
 
     response.setHeader(
