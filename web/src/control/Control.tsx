@@ -289,7 +289,7 @@ export function Control() {
               <TextInput
                 key={cfg.airport.icao}
                 value=""
-                placeholder="airport code (KSFO, EDDF, SNA…)"
+                placeholder="airport code (YMML, MEL, EDDF…)"
                 ariaLabel="Import airport runways"
                 onCommit={importAirport}
               />
@@ -531,7 +531,10 @@ export function Control() {
           <Row label="Compass">
             <Toggle value={cfg.compass} onChange={(v) => set({ compass: v })} />
           </Row>
-          <Row label="Airport runways" hint="SFO geometry; off if you've moved">
+          <Row
+            label="Airport runways"
+            hint={`${cfg.airport.name} geometry; import runways when you move`}
+          >
             <Toggle value={cfg.showAirport} onChange={(v) => set({ showAirport: v })} />
           </Row>
           <Row label="Highlight emergency">

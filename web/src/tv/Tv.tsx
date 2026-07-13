@@ -4,6 +4,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  DEFAULT_CONFIG,
   hfovFromZoomUnits,
   metersToMiles,
   norm180,
@@ -16,7 +17,7 @@ import { useLiveVideo } from "../tracker/useLiveVideo.js";
 import { useMse } from "./useMse.js";
 import { useStabilize } from "./useStabilize.js";
 import { SkyPolar } from "../tracker/components/SkyPolar.js";
-import { SfoGroundPanel } from "./SfoGround.js";
+import { AirportGroundPanel } from "./AirportGround.js";
 
 function routeLine(ac: Aircraft | undefined): { from?: string; to?: string } {
   if (!ac) return {};
@@ -87,6 +88,28 @@ export function Tv() {
     () => serverState.aircraft.find((a) => a.hex === target?.hex),
     [serverState.aircraft, target?.hex],
   );
+  const airportGround = useMemo(() => {
+    if (!serverState.now) return null;
+    return {
+      at: serverState.now,
+      aircraft: serverState.aircraft.flatMap((aircraft) =>
+        aircraft.onGround && aircraft.lat != null && aircraft.lon != null
+          ? [
+              {
+                hex: aircraft.hex,
+                flight: aircraft.flight,
+                reg: aircraft.registration,
+                typeCode: aircraft.typeCode,
+                lat: aircraft.lat,
+                lon: aircraft.lon,
+                trackDeg: aircraft.track,
+                gsKt: aircraft.gs,
+              },
+            ]
+          : [],
+      ),
+    };
+  }, [serverState.aircraft, serverState.now]);
 
   const overlay = useMemo(() => {
     if (!state?.pose || !config || !target?.predicted) return null;
@@ -113,10 +136,11 @@ export function Tv() {
   // route data is too unreliable to broadcast). The living-room TV keeps it.
   const params = new URLSearchParams(window.location.search);
   const showRoute = params.get("route") !== "0";
-  // ?ground=0 hides the SFO surface panel.
+  // ?ground=0 hides the configured-airport surface panel.
   const showGround = params.get("ground") !== "0";
   const { from, to } = routeLine(targetAc);
   const tracking = Boolean(target?.hex);
+  const airport = serverState.config?.airport ?? DEFAULT_CONFIG.airport;
 
   return (
     <div className="tv">
@@ -185,7 +209,7 @@ export function Tv() {
         </div>
         <div className="tv-clock">
           {mse.ok && fps != null ? `${fps} FPS · ` : ""}
-          {mse.ok ? "" : "MJPEG · "}SFO · {clock}
+          {mse.ok ? "" : "MJPEG · "}{airport.name} · {clock}
         </div>
       </header>
 
@@ -195,8 +219,10 @@ export function Tv() {
         <SkyPolar state={state} config={config} onPick={() => {}} />
       </aside>
 
-      {/* SFO surface traffic — who's taxiing / next up */}
-      {showGround && <SfoGroundPanel ground={serverState.sfoGround} />}
+      {/* Airport surface traffic — who's taxiing / next up */}
+      {showGround && (
+        <AirportGroundPanel airport={airport} ground={airportGround} />
+      )}
 
       {/* flight card */}
       <section className={`tv-card ${tracking ? "" : "idle"}`}>

@@ -22,9 +22,9 @@ case "$ARCH" in
     exit 1
     ;;
 esac
-# Receiver reference position (set to your location). Defaults to SFO.
-LAT="${LAT:-37.6213}"
-LON="${LON:--122.379}"
+# Receiver reference position (set to your location). Defaults to MEL/YMML.
+LAT="${LAT:--37.670732}"
+LON="${LON:-144.837898}"
 
 echo "==> apt update + base packages"
 sudo apt-get update

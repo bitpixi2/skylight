@@ -576,7 +576,7 @@ export class ViscaCamera implements CameraDriver {
     // stall around moves, and comparing the pose against a goal from a
     // long-gone era wedges the gate shut (observed: the post-pass home move
     // and fresh acquires near the stale goal were suppressed for seconds to
-    // forever — "never returns to SFO", "takes 5 s to start tracking").
+    // forever — "never returns home", "takes 5 s to start tracking").
     // trackRate/jog also null lastSent: velocity moves invalidate it.
     let allowPanTilt = true;
     if (!this.wantedMatched && last && this.lastSentAt) {

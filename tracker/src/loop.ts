@@ -9,6 +9,7 @@
 
 import {
   AxisTracker,
+  MEL_AIRPORT,
   azElFromSite,
   hfovFromZoomUnits,
   mountFromWorld,
@@ -728,7 +729,8 @@ export class ControlLoop {
     }
 
     // No target for a while in auto mode -> park at the ready position
-    // (default: 15° tilt along the bearing toward SFO, full wide), so the
+    // (default: 15° tilt along the bearing toward the default airport, full
+    // wide), so the
     // next departure climbs straight into frame.
     if (prediction) {
       this.lastTargetAt = now;
@@ -740,8 +742,8 @@ export class ControlLoop {
       now - this.lastTargetAt > cfg.home.afterSec * 1000
     ) {
       const azDeg =
-        cfg.home.mode === "sfo"
-          ? azElFromSite(cfg.site, { ...SFO_ARP, altM: cfg.site.altM }).azDeg
+        cfg.home.mode === "airport"
+          ? azElFromSite(cfg.site, { ...MEL_AIRPORT, altM: cfg.site.altM }).azDeg
           : cfg.home.azDeg;
       const pt = mountFromWorld(azDeg, cfg.home.elDeg, cfg.mount);
       this.atHome = true;
@@ -1182,6 +1184,3 @@ export class ControlLoop {
 function clamp(v: number, lo: number, hi: number): number {
   return Math.min(hi, Math.max(lo, v));
 }
-
-/** SFO airport reference point (the project's anchor airport). */
-const SFO_ARP = { lat: 37.6213, lon: -122.379 };

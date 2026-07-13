@@ -159,10 +159,10 @@ export function ConfigPanel({
             onChange={(e) => conn.send({ type: "patchTracker", patch: { home: { enabled: e.target.checked } } })} />
         </label>
         <div className="segmented">
-          {(["sfo", "fixed"] as const).map((m) => (
+          {(["airport", "fixed"] as const).map((m) => (
             <button key={m} className={`segment ${config.home.mode === m ? "active" : ""}`}
               onClick={() => conn.send({ type: "patchTracker", patch: { home: { mode: m } } })}>
-              {m === "sfo" ? "toward SFO" : "fixed az"}
+              {m === "airport" ? "toward airport" : "fixed az"}
             </button>
           ))}
         </div>

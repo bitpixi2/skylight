@@ -63,6 +63,7 @@ export function Stream() {
   const det = state.vision.detection;
   const { from, to } = routeLine(targetAc);
   const tracking = Boolean(target?.hex);
+  const locationName = serverState.config?.locationName ?? "Melbourne Airport";
 
   return (
     <div className="stream">
@@ -70,7 +71,7 @@ export function Stream() {
       <header className="stream-top">
         <div className="stream-live">
           <span className="stream-live-dot" />
-          LIVE · SKY CAMERA OVER SFO
+          LIVE · SKY CAMERA OVER {locationName.toUpperCase()}
         </div>
         {tracking ? (
           <div className="stream-card">

@@ -7,8 +7,8 @@ set -euo pipefail
 SRC="${SRC:-/tmp/dump1090-fa}"
 JSON_DIR="${JSON_DIR:-/tmp/adsb-json}"
 PORT="${PORT:-8080}"
-LAT="${LAT:-37.6213}"
-LON="${LON:--122.379}"
+LAT="${LAT:--37.670732}"
+LON="${LON:-144.837898}"
 
 # Use the rtl-sdr-blog build we installed to /usr/local.
 export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig:${PKG_CONFIG_PATH:-}"

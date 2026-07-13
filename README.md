@@ -4,6 +4,11 @@
   <em>Project the aircraft passing overhead onto your ceiling, in real time - an X-ray through the roof.</em>
 </p>
 
+> **Melbourne Airport edition.** This fork starts at **MEL/YMML** in Victoria,
+> Australia, with the live aircraft feed, runway overlay, surface panel, and
+> camera defaults all aligned to Melbourne Airport. The original Skylight project
+> is by [cpaczek](https://github.com/cpaczek/skylight).
+
 <p align="center">
   <a href="https://skylightceiling.com"><b>🛰️ Get notified when I launch on a crowdfunding platform → skylightceiling.com</b></a>
   <br><sub>A ready-made kit is coming. Join the waitlist for early access &amp; launch pricing.</sub>
@@ -31,9 +36,9 @@ It also draws the **real sky** behind the planes - sun, moon, bright stars and
 constellations, and live **satellites including the ISS** - all at their true positions
 for your location and time. Tune everything from your phone.
 
-> Reference build is centered on **San Francisco International (SFO)**, but it works
-> anywhere - set your location in the control panel and import your airport's runways
-> by ICAO/IATA code (worldwide, via OurAirports) and you're flying.
+> This edition is centered on **Melbourne Airport (MEL/YMML)**, but it works
+> anywhere: set your location in the control panel and import another airport's
+> runways by ICAO/IATA code (worldwide, via OurAirports).
 
 ## Features
 
@@ -132,11 +137,18 @@ DATA_SOURCE=api pnpm dev
   prediction, zoom, calibration) works with zero hardware.
 - **TV dashboard:** http://localhost:5173/tv.html
 
-**Then set your location** from the control panel's **Location** section - search a
-city/airport, tap **Current** to use the browser's location, or type `lat,lon`
-directly. The default is SFO, so until you change it you'll see San Francisco traffic
-(or nothing, if your radius is small). Your airport's runways can be drawn too:
-type its ICAO/IATA code into **Location → Runways** and they're imported automatically.
+The display starts at Melbourne Airport. To move it, use the control panel's
+**Location** section: search a city/airport, tap **Current** to use the browser's
+location, or type `lat,lon` directly. Type an ICAO/IATA code into
+**Location → Runways** to import another airport's geometry automatically.
+
+### Wall touchscreen (no Pi or projector)
+
+Run Skylight on an always-on computer, NAS, or container with `DATA_SOURCE=api`,
+then open `http://<server>:3000/?kiosk=1` on the wall display. Tap once to request
+full-screen mode. The display client can be an Echo Show running Silk, an Android
+tablet, or any framed touchscreen with a modern browser; the server still runs on
+the other host. Use `/control` on the touchscreen or a phone for configuration.
 
 ### With a radio (locally)
 
@@ -209,11 +221,10 @@ tunnel rather than a LAN IP / `*.local`, add it to `ALLOWED_HOSTS` (see below).
 
 ## Troubleshooting
 
-**No planes, using the public API.** The view is centered on SFO until you set your
-location - open `/control` and use the **Location** section (search, **Current**, or
-`lat,lon`). Then check the status line at the top of `/control`: it shows the live
-source, count, and the exact failure reason if polling is failing. If you're far from
-an airport, also widen the **Radius** slider.
+**No planes, using the public API.** The view starts at Melbourne Airport. Open
+`/control` and check the status line: it shows the live source, count, and exact
+failure reason when polling fails. If you moved the location away from the airport,
+also widen the **Radius** slider.
 
 **`source fetch failed: …` in the status line.** The reason in parentheses tells you
 what's wrong, measured *from the server*:
@@ -262,12 +273,10 @@ fields:
 | `showDestArc` / `showRouteDetail` | "Window to elsewhere". |
 | `tracker.*` | The whole camera subsystem - driver (`sim`/`visca`), camera IP, mount calibration, target selection criteria, prediction/pursuit tuning, zoom + vision behavior. All live-tunable from the tracker debug UI. |
 
-**Using it somewhere other than SFO:** set your location from the control panel's
-**Location** section (or edit `centerLat`/`centerLon`). Stars, sun, moon, and satellites
-are computed for your coordinates automatically. The runway overlay is still SFO-specific
-geometry - turn off **Airport runways** if you've moved, or replace it in
-[`web/src/display/airports.ts`](web/src/display/airports.ts) with your local airport
-(coordinates from [OurAirports](https://ourairports.com/data/)).
+**Using it somewhere other than Melbourne:** set your location from the control
+panel's **Location** section (or edit `centerLat`/`centerLon`). Stars, sun, moon, and
+satellites are recomputed automatically. Import the new airport under
+**Location → Runways** so the overlay and TV surface panel move with you.
 
 > Location search uses the free [Nominatim](https://nominatim.openstreetmap.org/)
 > (OpenStreetMap) service. Set `GEOCODE_USER_AGENT` to identify your deployment if you
@@ -278,7 +287,8 @@ geometry - turn off **Airport runways** if you've moved, or replace it in
 | Env | Default | Meaning |
 |---|---|---|
 | `DATA_SOURCE` | `radio` | `radio` (dump1090) or `api` (airplanes.live) |
-| `AIRCRAFT_JSON_URL` | `http://localhost:8080/aircraft.json` | dump1090 feed |
+| `AIRCRAFT_JSON_URL` | `http://localhost:8080/data/aircraft.json` | dump1090 feed |
+| `POLL_MS` | `2000` (API) / `1000` (radio) | Primary aircraft polling interval |
 | `SUPPLEMENT_API` | `1` | When on radio, merge the API too (keeps landing aircraft alive) |
 | `PORT` / `HOST` | `3000` / `0.0.0.0` | HTTP + WebSocket |
 | `ALLOWED_HOSTS` | *(empty)* | Extra Host/Origin allowlist entries, comma-separated. Wildcards: `*.example.com`. Loopback, RFC1918 LAN, IPv6 ULA / link-local, and `*.local` are allowed by default. |

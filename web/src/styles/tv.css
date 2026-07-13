@@ -286,7 +286,7 @@ body {
 
 .tv-clock { font-variant-numeric: tabular-nums; }
 
-/* --- SFO surface panel (who's taxiing / next up) --- */
+/* --- Airport surface panel (who's taxiing / next up) --- */
 .tv-ground {
   position: absolute;
   left: 30px; top: 50%;

@@ -12,7 +12,7 @@ import type {
   ViscaUnitScale,
 } from "./camera.js";
 import type { FovPoint } from "./aim.js";
-import { SFO_AIRPORT, type Airport } from "./airport.js";
+import { MEL_AIRPORT, type Airport } from "./airport.js";
 import { CONSTELLATIONS } from "./stars.js";
 
 export type Theme = "ambient" | "telemetry" | "focus";
@@ -216,8 +216,8 @@ export interface TrackerConfig {
   /** Idle "ready position" when auto mode has no target. */
   home: {
     enabled: boolean;
-    /** "sfo" = aim along the bearing site->SFO; "fixed" = use azDeg. */
-    mode: "sfo" | "fixed";
+    /** "airport" = aim along the bearing site->default airport; "fixed" = use azDeg. */
+    mode: "airport" | "fixed";
     azDeg: number;
     elDeg: number;
     /** Go home after this long without a target, s. */
@@ -340,11 +340,11 @@ export interface Config {
 }
 
 export const DEFAULT_CONFIG: Config = {
-  // Default center: San Francisco International (SFO). Set this to your own
-  // location — ideally where you'll be looking up at the ceiling.
-  centerLat: 37.6213,
-  centerLon: -122.379,
-  locationName: "San Francisco International",
+  // Default center: Melbourne Airport (MEL/YMML), Victoria, Australia.
+  // Set this to the actual installation location for a ceiling projection.
+  centerLat: MEL_AIRPORT.lat,
+  centerLon: MEL_AIRPORT.lon,
+  locationName: "Melbourne Airport",
   radiusMiles: 3,
   locationProfiles: [],
 
@@ -401,13 +401,13 @@ export const DEFAULT_CONFIG: Config = {
   locationDisplay: "name",
   speedUnit: "kt",
   altitudeUnit: "ft",
-  distanceUnit: "mi",
+  distanceUnit: "km",
 
   rangeRings: true,
   compass: true,
   highlightEmergency: true,
   showAirport: true,
-  airport: SFO_AIRPORT,
+  airport: MEL_AIRPORT,
   showHud: false,
 
   showStars: true,
@@ -431,7 +431,7 @@ export const DEFAULT_CONFIG: Config = {
     rtspUrl: "rtsp://{ip}:554/live/av0",
     rtspSubUrl: "rtsp://{ip}:554/live/av1",
     // Default site = the display center; replace with the camera's real spot.
-    site: { lat: 37.6213, lon: -122.379, altM: 0 },
+    site: { lat: MEL_AIRPORT.lat, lon: MEL_AIRPORT.lon, altM: 0 },
     limits: {
       panMinDeg: -175,
       panMaxDeg: 175,
@@ -519,7 +519,7 @@ export const DEFAULT_CONFIG: Config = {
     },
     home: {
       enabled: true,
-      mode: "sfo",
+      mode: "airport",
       azDeg: 120,
       elDeg: 15,
       afterSec: 10,

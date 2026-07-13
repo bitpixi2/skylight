@@ -64,13 +64,13 @@ function parseCsvLine(line: string): string[] {
 }
 
 /**
- * Resolve an airport (with runway geometry) by ICAO ident ("KSFO", "EDDF")
- * or IATA code ("SFO"). Throws with a human-readable message on miss.
+ * Resolve an airport (with runway geometry) by ICAO ident ("YMML", "EDDF")
+ * or IATA code ("MEL"). Throws with a human-readable message on miss.
  */
 export async function lookupAirport(code: string, dataDir: string): Promise<Airport> {
   const q = code.trim().toUpperCase();
   if (!/^[A-Z0-9]{3,4}$/.test(q)) {
-    throw new Error("enter an ICAO (KSFO) or IATA (SFO) airport code");
+    throw new Error("enter an ICAO (YMML) or IATA (MEL) airport code");
   }
 
   const airportsCsv = await cachedCsv(dataDir, "airports.csv");

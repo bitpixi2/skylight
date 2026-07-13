@@ -15,7 +15,6 @@ import { Hub } from "./hub.js";
 import { TleStore } from "./tle.js";
 import { resolveLocation } from "./geocode.js";
 import { buildHostMatcher, originHostname } from "./allowed-hosts.js";
-import { SfoGroundPoller } from "./sfo-ground.js";
 import { lookupAirport } from "./airports.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -29,7 +28,10 @@ const RADIO_URL =
   process.env.AIRCRAFT_JSON_URL ?? "http://localhost:8080/data/aircraft.json";
 const API_URL =
   process.env.API_URL ?? "https://api.airplanes.live/v2/point/{lat}/{lon}/{r}";
-const POLL_MS = Number(process.env.POLL_MS ?? 1000);
+// The public API is intentionally slower than a local decoder. Polling its
+// hobby endpoint at the exact 1 req/s ceiling is brittle once latency and
+// retries are involved; 2 s stays live while leaving safe headroom.
+const POLL_MS = Number(process.env.POLL_MS ?? (SOURCE === "api" ? 2000 : 1000));
 const ROUTE_CACHE_HOURS = Number(process.env.ROUTE_CACHE_HOURS ?? 12);
 // When on radio, also poll the API and merge (keeps landing aircraft alive).
 const SUPPLEMENT_API = (process.env.SUPPLEMENT_API ?? "1") !== "0";
@@ -37,7 +39,7 @@ const API_POLL_MS = Number(process.env.API_POLL_MS ?? 4000);
 // Nominatim asks for a descriptive User-Agent identifying the application.
 const GEOCODE_UA =
   process.env.GEOCODE_USER_AGENT ??
-  "skylight/0.1 (https://github.com/cpaczek/skylight)";
+  "skylight-melbourne/0.1 (https://github.com/bitpixi2/skylight)";
 const CONFIG_PATH = resolve(DATA_DIR, "config.json");
 const SERVER_DEFAULT_CONFIG: Config = { ...DEFAULT_CONFIG, radioUrl: RADIO_URL };
 
@@ -98,7 +100,6 @@ async function main(): Promise<void> {
     store,
     getSnapshot: () => poller.getSnapshot(),
     getStatus: () => poller.getStatus(),
-    getSfoGround: () => sfoGround.getSnapshot(),
     isOriginAllowed: (origin) => {
       // No Origin header: not a browser (curl/scripts). Allow — the WS
       // hijack risk is browser-only.
@@ -119,12 +120,6 @@ async function main(): Promise<void> {
     onSnapshot: (now, aircraft) => hub.broadcastAircraft(now, aircraft),
     onStatus: (status) => hub.broadcastStatus(status),
   });
-
-  // SFO surface traffic (airplanes.live) — the "who's next" panel on the TV
-  // and Twitch stream. Local receiver can't hear ground targets at 13 mi.
-  const sfoGround = new SfoGroundPoller((at, aircraft) =>
-    hub.broadcastSfoGround(at, aircraft),
-  );
 
   // --- REST API (handy for debugging + non-WS clients) ---
   app.get("/api/health", (_req, res) => res.json({ ok: true }));
@@ -193,7 +188,6 @@ async function main(): Promise<void> {
   }
 
   poller.start();
-  sfoGround.start();
 
   server.listen(PORT, HOST, () => {
     console.log(`[server] listening on http://${HOST}:${PORT}`);
