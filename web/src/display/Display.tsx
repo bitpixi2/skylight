@@ -159,8 +159,8 @@ export function Display() {
         state={state}
         view={personalDeck ? deckView : cfg.projectionMode === "sky" ? "sky" : "runway"}
         autoSwitching={state.hosted}
-        onToggleView={personalDeck
-          ? () => setDeckView((current) => current === "runway" ? "sky" : "runway")
+        onSelectView={personalDeck
+          ? (view) => setDeckView(view)
           : undefined}
       />
       {cfg.showHud && (

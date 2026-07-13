@@ -9,6 +9,7 @@ export interface WeatherSnapshot {
     humidityPct: number;
     precipitationMm: number;
     weatherCode: number;
+    isDay: boolean;
     cloudPct: number;
     pressureHpa: number;
     windKt: number;
@@ -20,7 +21,7 @@ export interface WeatherSnapshot {
 const DIRECT_WEATHER_URL =
   "https://api.open-meteo.com/v1/forecast" +
   "?latitude=-37.4587733&longitude=144.6776503" +
-  "&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m" +
+  "&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,is_day,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m" +
   "&temperature_unit=celsius&wind_speed_unit=kn&precipitation_unit=mm" +
   "&timezone=Australia%2FMelbourne&forecast_days=1";
 
@@ -32,6 +33,7 @@ interface DirectWeatherResponse {
     relative_humidity_2m: number;
     precipitation: number;
     weather_code: number;
+    is_day: number;
     cloud_cover: number;
     pressure_msl: number;
     wind_speed_10m: number;
@@ -51,6 +53,7 @@ function normalizeDirectWeather(body: DirectWeatherResponse): WeatherSnapshot {
       humidityPct: current.relative_humidity_2m,
       precipitationMm: current.precipitation,
       weatherCode: current.weather_code,
+      isDay: current.is_day === 1,
       cloudPct: current.cloud_cover,
       pressureHpa: current.pressure_msl,
       windKt: current.wind_speed_10m,

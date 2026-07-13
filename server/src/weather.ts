@@ -7,6 +7,7 @@ const CURRENT_FIELDS = [
   "relative_humidity_2m",
   "precipitation",
   "weather_code",
+  "is_day",
   "cloud_cover",
   "pressure_msl",
   "wind_speed_10m",
@@ -32,6 +33,7 @@ interface OpenMeteoResponse {
     relative_humidity_2m: number;
     precipitation: number;
     weather_code: number;
+    is_day: number;
     cloud_cover: number;
     pressure_msl: number;
     wind_speed_10m: number;
@@ -59,6 +61,7 @@ export async function fetchAirportWeather(): Promise<object> {
       humidityPct: current.relative_humidity_2m,
       precipitationMm: current.precipitation,
       weatherCode: current.weather_code,
+      isDay: current.is_day === 1,
       cloudPct: current.cloud_cover,
       pressureHpa: current.pressure_msl,
       windKt: current.wind_speed_10m,

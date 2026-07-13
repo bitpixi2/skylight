@@ -17,14 +17,19 @@ Brenton's Flight Deck alternates every 45 seconds between two live views:
   Riddells Creek viewpoint, with aircraft, stars, planets, the sun, moon, satellites,
   compass directions, and elevation rings in their current positions.
 
-The **Look up / Airspace** button switches views immediately. The TV-first screen
+The large **Airspace / Look up** touch control switches views immediately. The TV-first screen
 is divided into:
 
 - a full-width header with Melbourne local time and connection status;
 - a large live radar or sky view across the left side;
-- a closest-aircraft card on the right, showing route and aircraft details only
-  when supplied by the live feed; and
-- a lower strip with the next five aircraft by distance.
+- an aircraft card and current-weather card on the right, showing details only
+  when supplied by the live feeds; and
+- a lower strip with the next five aircraft by distance. Each tile is a button
+  that opens that aircraft in the right rail.
+
+Airline SVGs are matched from the verified three-letter operator prefix in the
+aircraft callsign. If a callsign has no confident match, the display leaves the
+logo out rather than guessing.
 
 When no aircraft is close, the side card switches to a quiet-sky state with the
 next calculated ISS pass while the looking-up view continues to show current
@@ -48,6 +53,7 @@ not show or store a household name, street address, or house-level coordinate.
 |---|---|
 | Aircraft positions | [airplanes.live](https://airplanes.live/) public ADS-B feed |
 | Current conditions | [Open-Meteo](https://open-meteo.com/) |
+| Airline SVG catalog | [Soaring Symbols](https://github.com/soaring-symbols/soaring-symbols) |
 | Satellite elements | [CelesTrak](https://celestrak.org/) |
 | Sun, moon, stars and planets | [astronomy-engine](https://github.com/cosinekitty/astronomy) |
 | Satellite positions | [satellite.js](https://github.com/shashwatak/satellite-js) |
@@ -106,3 +112,6 @@ corepack pnpm build
 
 The original Skylight project is by [Chris Paczek](https://github.com/cpaczek).
 This fork retains the upstream [MIT license](LICENSE).
+
+The bundled Soaring Symbols catalog is distributed under its MIT license.
+Airline names and logos remain trademarks of their respective owners.
