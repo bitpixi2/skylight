@@ -1,13 +1,19 @@
-// Single auto-reconnecting WebSocket connection shared within a page.
-// Receives config / aircraft / status; sends config patches.
+// Shared browser connection: WebSocket locally, HTTP polling when hosted.
 
-import type {
-  Aircraft,
-  ClientMessage,
-  Config,
-  ServerMessage,
-  SourceStatus,
+import {
+  DEFAULT_CONFIG,
+  type Aircraft,
+  type ClientMessage,
+  type Config,
+  type ServerMessage,
+  type SourceStatus,
 } from "@shared/index.js";
+
+interface HostedSnapshot {
+  now: number;
+  aircraft?: Aircraft[];
+  status: SourceStatus;
+}
 
 export interface StreamState {
   connected: boolean;
@@ -23,6 +29,8 @@ export class Connection {
   private ws: WebSocket | null = null;
   private listeners = new Set<Listener>();
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private hostedPollTimer: ReturnType<typeof setInterval> | null = null;
+  private usingHostedPolling = false;
   private closed = false;
 
   state: StreamState = {
@@ -53,11 +61,13 @@ export class Connection {
       return;
     }
     this.ws.onopen = () => {
+      this.stopHostedPolling();
       this.send({ type: "hello", role: this.role });
       this.update({ connected: true });
     };
     this.ws.onclose = () => {
       this.update({ connected: false });
+      this.startHostedPolling();
       this.scheduleReconnect();
     };
     this.ws.onerror = () => this.ws?.close();
@@ -65,11 +75,46 @@ export class Connection {
   }
 
   private scheduleReconnect(): void {
-    if (this.closed || this.reconnectTimer) return;
+    if (this.closed || this.usingHostedPolling || this.reconnectTimer) return;
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
-      if (!this.closed) this.open();
+      if (!this.closed && !this.usingHostedPolling) this.open();
     }, 1500);
+  }
+
+  private startHostedPolling(): void {
+    if (this.closed || this.hostedPollTimer) return;
+    void this.pollHostedSnapshot();
+    this.hostedPollTimer = setInterval(() => void this.pollHostedSnapshot(), 3000);
+  }
+
+  private stopHostedPolling(): void {
+    if (this.hostedPollTimer) clearInterval(this.hostedPollTimer);
+    this.hostedPollTimer = null;
+    this.usingHostedPolling = false;
+  }
+
+  private async pollHostedSnapshot(): Promise<void> {
+    try {
+      const response = await fetch("/api/live");
+      const snapshot = (await response.json()) as HostedSnapshot;
+      if (!response.ok) {
+        this.update({ connected: true, config: DEFAULT_CONFIG, status: snapshot.status });
+        return;
+      }
+      this.usingHostedPolling = true;
+      if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+      this.update({
+        connected: true,
+        config: DEFAULT_CONFIG,
+        now: snapshot.now,
+        aircraft: snapshot.aircraft ?? [],
+        status: snapshot.status,
+      });
+    } catch {
+      // Keep trying both the hosted endpoint and the appliance WebSocket.
+    }
   }
 
   private onMessage(raw: string): void {
@@ -119,6 +164,7 @@ export class Connection {
   close(): void {
     this.closed = true;
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+    this.stopHostedPolling();
     this.ws?.close();
   }
 }

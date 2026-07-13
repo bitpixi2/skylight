@@ -150,6 +150,13 @@ full-screen mode. The display client can be an Echo Show running Silk, an Androi
 tablet, or any framed touchscreen with a modern browser; the server still runs on
 the other host. Use `/control` on the touchscreen or a phone for configuration.
 
+For a quick TV-browser test with no always-on computer, this fork also supports a
+hosted Vercel preview. The hosted display polls the public aircraft feed directly
+through a small serverless endpoint and uses the Melbourne defaults. Open the
+deployment URL with `/?kiosk=1` and tap once for full screen. This preview is
+display-only: persistent controls, a local radio receiver, and the camera tracker
+still require the full Skylight server.
+
 ### With a radio (locally)
 
 ```bash
