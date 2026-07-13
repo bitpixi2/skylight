@@ -42,28 +42,45 @@ celestial positions.
 Aircraft positions refresh about every three seconds, the clocks tick every second,
 and current weather is refreshed every five minutes from 15-minute model conditions.
 
-## TV or ceiling use
+## Display options
 
-Open the deployed site in the TV's browser with `/?kiosk=1` appended to the URL.
-Tap **Expand** to request fullscreen mode and a screen wake lock. The same 16:9
-layout is designed to work on a regular TV, an Echo Show 15 or framed touchscreen,
-or a ceiling-filling image from a roughly $100 vertical projector.
+### Option 1 — TV dashboard
 
-The public display uses only an approximate viewpoint in Victoria. It does not
-show or store a household name, street address, or house-level coordinate.
+![Brenton's Flight Deck running as the full interactive TV dashboard](docs/brentons-flight-deck-tv.png)
 
-### Minimal ceiling projector
+Use the full 16:9 dashboard on a regular TV, Echo Show 15, or framed touchscreen
+in either of these ways:
 
-Open `/?kiosk=2` for the separate projector presentation. It keeps only the
-full-screen overhead aircraft field, longer-lived trails, stars,
-constellation lines, the Moon, planets and satellites; the nearest aircraft's
-callsign, type, altitude, and speed remain visible beside it. There are no
-dashboard panels or visible cursor.
+- **TV browser:** open the [public Kiosk 1 dashboard](https://skylight-melbourne.vercel.app/?kiosk=1)
+  directly in the TV's built-in browser.
+- **Screen mirroring:** open the same Kiosk 1 link on a phone, tablet, or computer,
+  then mirror or cast that screen to the TV with AirPlay, Google Cast, Miracast,
+  or a wired HDMI connection where supported.
+
+Tap **Expand** after opening the dashboard to request fullscreen mode and a screen
+wake lock. Kiosk 1 keeps the cursor visible and provides the interactive **Runway**,
+**Overhead**, and **Follow** controls.
+
+The airline logo SVGs shown in the dashboard are provided by
+[Soaring Symbols](https://github.com/soaring-symbols/soaring-symbols), created by
+Anh Thang and distributed under the MIT license. Airline names and logos remain
+trademarks of their respective owners.
+
+### Option 2 — Minimal ceiling projector
+
+Open the [public Kiosk 2 projector](https://brentons-overhead.vercel.app) for the
+separate ceiling presentation. It keeps only the full-screen overhead aircraft
+field, longer-lived trails, stars, constellation lines, the Moon, planets and
+satellites; the nearest aircraft's callsign, type, altitude, and speed remain
+visible beside it. There are no dashboard panels or visible cursor.
 
 Kiosk 2 requests a screen wake lock immediately and enters fullscreen on its
 first pointer gesture. A deployment built with `VITE_DEFAULT_KIOSK=2` opens this
 projector presentation by default, which is how the separate projector website
 is published.
+
+Both public displays use only an approximate viewpoint in Victoria. They do not
+show or store a household name, street address, or house-level coordinate.
 
 ## Live data
 
@@ -132,5 +149,8 @@ corepack pnpm build
 The original Skylight project is by [Chris Paczek](https://github.com/cpaczek).
 This fork retains the upstream [MIT license](LICENSE).
 
-The bundled Soaring Symbols catalog is distributed under its MIT license.
-Airline names and logos remain trademarks of their respective owners.
+The bundled airline SVG catalog comes from
+[Soaring Symbols](https://github.com/soaring-symbols/soaring-symbols), created by
+Anh Thang and distributed under its MIT license. A copy of that license is kept
+with the bundled assets at `web/public/airline-logos/LICENSE`. Airline names and
+logos remain trademarks of their respective owners.
