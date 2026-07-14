@@ -65,7 +65,12 @@ into Kiosk 2, so the projector only needs to provide a reliable HDMI image.
 | Vertical projector | [ViewSonic LSD400HD](https://www.viewsonic.com/ap/products/projectors/LSD400HD?app=1) — Full HD laser, 4,000 ANSI lumens, 360-degree projection and 1.48–1.62 standard throw | [$1,499 sale](https://justprojectors.com.au/viewsoniclsd400hd.htm) |
 | Blackout curtains | Room-darkening curtains or blinds for stronger daytime contrast | Varies by room |
 | Installation | Secure 360-degree-compatible stand or mount and cabling | $100–$250 |
-| **Estimated total** | Pi setup with the ViewSonic; excludes curtains, installation labour and internet service | **$1,800–$2,000 + curtains** |
+| Optional local ADS-B | RTL-SDR and antenna kit for locally received 1090 MHz aircraft data; a better dedicated antenna can be added for greater range. [How ADS-B works](https://www.casa.gov.au/operations-safety-and-travel/airspace/automatic-dependent-surveillance-broadcast-ads-b/how-ads-b-works) | $105 basic; $145–$205 upgraded |
+| Optional airband audio | A second RTL-SDR permits simultaneous ADS-B and 118–137 MHz voice reception, or use a receive-only [XHData D-808](https://www.tecsunradios.com.au/store/product/xhdata-d-808-lw-mw-sw-fm-airband-receiver/) | $105–$185 |
+| **Estimated total** | Pi setup with the ViewSonic; excludes curtains, optional radio equipment, installation labour and internet service | **$1,800–$2,000 + curtains** |
+
+The optional radio equipment is receive-only. [ACMA says](https://www.acma.gov.au/apparatus-licences)
+a receiver only needs an apparatus licence when an assigned frequency is required.
 
 ## Live data
 
