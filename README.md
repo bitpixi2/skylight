@@ -4,6 +4,7 @@
 
 [![TV dashboard](https://img.shields.io/badge/TV_dashboard-open-00b8a9?style=flat-square)](https://skylight-melbourne.vercel.app/?kiosk=1)
 [![Overhead projector](https://img.shields.io/badge/Overhead_projector-open-18a6c9?style=flat-square)](https://brentons-overhead.vercel.app)
+<br>
 [![CI](https://github.com/bitpixi2/melbourne-flight-deck/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/bitpixi2/melbourne-flight-deck/actions/workflows/ci.yml)
 [![MIT license](https://img.shields.io/github/license/bitpixi2/melbourne-flight-deck?style=flat-square)](LICENSE)
 [![Last commit](https://img.shields.io/github/last-commit/bitpixi2/melbourne-flight-deck?style=flat-square)](https://github.com/bitpixi2/melbourne-flight-deck/commits/main)
@@ -48,8 +49,7 @@ fork of
 
 ![Brenton's Flight Deck running as the full interactive TV dashboard](docs/brentons-flight-deck-tv.png)
 
-Use the full 16:9 dashboard on a regular TV, Echo Show 15, or framed touchscreen
-at no extra hardware or subscription cost when using a screen and internet
+Use the full 16:9 dashboard on a regular TV using a screen and internet
 connection you already have. Open it in either of these ways:
 
 - **TV browser:** open the [public Kiosk 1 dashboard](https://skylight-melbourne.vercel.app/?kiosk=1)
@@ -61,7 +61,9 @@ connection you already have. Open it in either of these ways:
 Features include a live 70 km runway radar, overhead sky, tap-to-follow aircraft,
 current weather, airline logos, and the next five flights. Aircraft positions
 refresh about every three seconds, while Runway and Overhead alternate every 45
-seconds. Tap **Expand** for fullscreen and a screen wake lock; Kiosk 1 keeps the
+seconds.
+
+Tap **Expand** for fullscreen and a screen wake lock; Kiosk 1 keeps the
 cursor visible and includes interactive **Runway**, **Overhead**, and **Follow**
 controls.
 
@@ -77,7 +79,10 @@ constellations, the Moon, planets, satellites and basic details for the nearest
 flight. There are no dashboard panels or visible cursor. It requests a screen
 wake lock immediately and enters fullscreen on its first tap.
 
-#### Example vertical projector
+This is a hand-off version, but it could easily be adapted to include either some automatically rotating views,
+or a tap selections, borrowing from Option 1.
+
+#### Example vertical projector to purchase
 
 [Kimwood vertical projector — A$145.99 on Amazon Australia](https://www.amazon.com.au/Kimwood-Projector-Bluetooth-Ultra-Projectors/dp/B0G1S78RNM).
 This inexpensive rotating-projector style is suited to the ceiling setup;
