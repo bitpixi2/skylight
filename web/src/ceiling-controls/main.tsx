@@ -26,6 +26,11 @@ appleIcon.rel = "apple-touch-icon";
 appleIcon.href = "/ceiling-controls-icon-192.png";
 document.head.append(appleIcon);
 
+const appleTitle = document.createElement("meta");
+appleTitle.name = "apple-mobile-web-app-title";
+appleTitle.content = "Brenton's Ceiling Controls";
+document.head.append(appleTitle);
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => void navigator.serviceWorker.register("/ceiling-controls-sw.js"));
 }
