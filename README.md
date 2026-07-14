@@ -52,6 +52,8 @@ and pricing can change.
 
 ### Option 3 — Overhead Projector Premium
 
+![Premium Brenton's Overhead ceiling installation with a vertical projector and Raspberry Pi](docs/brentons-overhead-premium-mockup.png)
+
 For a brighter, more permanent ceiling installation, use a Raspberry Pi as the
 dedicated player and a Full HD standard-throw projector. The Pi boots directly
 into Kiosk 2, so the projector only needs to provide a reliable HDMI image.
