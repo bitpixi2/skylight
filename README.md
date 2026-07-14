@@ -72,34 +72,6 @@ into Kiosk 2, so the projector only needs to provide a reliable HDMI image.
 | Installation | Secure 360-degree-compatible stand or mount and cabling | $100–$250 |
 | **Estimated total** | Pi setup with the ViewSonic; excludes curtains, installation labour and internet service | **$1,800–$2,000 + curtains** |
 
-Prices were checked in Australia on 14 July 2026 and will change. The projector
-is the main cost; an existing suitable projector can reduce the total
-substantially.
-
-#### Installation plan
-
-1. **Measure first.** Choose the ceiling image area and measure the full optical
-   path from the projector to that area. The ViewSonic produces a 100-inch image
-   at approximately 3.28 m with its 1.48–1.62 throw. Confirm the desired image
-   size before fixing a stand or mount.
-2. **Aim it upward safely.** The ViewSonic is explicitly rated for 360-degree
-   projection, allowing its lens to point directly at the ceiling without a
-   mirror. Secure the 3 kg projector with hardware suitable for that orientation
-   and keep every intake and exhaust vent clear.
-3. **Control the room light.** Fit blackout curtains or blinds where daylight
-   reaches the room so the projected aircraft and fine trails remain visible.
-4. **Prepare the Pi.** Install Raspberry Pi OS with Desktop on the microSD card,
-   connect Wi-Fi or Ethernet, and connect the Pi to the projector over HDMI.
-5. **Make it appliance-like.** Configure Chromium to open
-   `https://brentons-overhead.vercel.app` in kiosk mode at login, disable screen
-   blanking and restart the browser automatically if it exits.
-6. **Align and test.** Focus the ceiling image, minimise digital keystone, confirm
-   the Kiosk 2 flight feed updates, and run the complete system for several hours
-   while checking temperature, ventilation and network recovery.
-
-Both public displays use only an approximate viewpoint in Victoria. They do not
-show or store a household name, street address, or house-level coordinate.
-
 ## Live data
 
 | Information | Source |
