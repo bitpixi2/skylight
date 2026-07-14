@@ -32,7 +32,9 @@ appleTitle.content = "Brenton's Ceiling Controls";
 document.head.append(appleTitle);
 
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => void navigator.serviceWorker.register("/ceiling-controls-sw.js"));
+  const registerServiceWorker = () => void navigator.serviceWorker.register("/ceiling-controls-sw.js");
+  if (document.readyState === "complete") registerServiceWorker();
+  else window.addEventListener("load", registerServiceWorker, { once: true });
 }
 
 createRoot(document.getElementById("root")!).render(
