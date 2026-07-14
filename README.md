@@ -7,8 +7,10 @@ an existing TV or touchscreen, an inexpensive ceiling projector, or a brighter
 Raspberry Pi-powered premium installation. Its viewpoint is positioned over
 Brenton's town in Victoria, not directly over Melbourne Airport (Tullamarine),
 and combines real-time aircraft around that viewpoint with airport context,
-current weather, local time, and the sky overhead. Customising it for another town
-or home requires a new fork with its viewpoint changed. This is a Melbourne-focused
+current weather, local time, and the sky overhead.
+
+Customising it for another town and name requires a new fork with its viewpoint
+changed (and the name changed on the TV version). This is an Australia-focused
 fork of
 [cpaczek/skylight](https://github.com/cpaczek/skylight).
 
