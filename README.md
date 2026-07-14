@@ -86,11 +86,6 @@ into Kiosk 2, so the projector only needs to provide a reliable HDMI image.
 
 ## License and attribution
 
-The original Skylight project is by [Chris Paczek](https://github.com/cpaczek).
-This fork retains the upstream [MIT license](LICENSE).
-
-The bundled airline SVG catalog comes from
-[Soaring Symbols](https://github.com/soaring-symbols/soaring-symbols), created by
-Anh Thang and distributed under its MIT license. A copy of that license is kept
-with the bundled assets at `web/public/airline-logos/LICENSE`. Airline names and
-logos remain trademarks of their respective owners.
+The original Skylight project is by [Chris Paczek](https://github.com/cpaczek).<br>
+This fork retains the upstream [MIT license](LICENSE).<br>
+Airline SVGs are from [Soaring Symbols](https://github.com/soaring-symbols/soaring-symbols) by Anh Thang (MIT); airline trademarks remain with their owners.
