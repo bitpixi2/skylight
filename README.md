@@ -146,56 +146,6 @@ show or store a household name, street address, or house-level coordinate.
 | Satellite positions | [satellite.js](https://github.com/shashwatak/satellite-js) |
 | Melbourne Airport runways | [OurAirports](https://ourairports.com/) |
 
-## Run locally
-
-Requires Node.js 20 or newer.
-
-```bash
-corepack pnpm install
-corepack pnpm build
-DATA_SOURCE=api corepack pnpm start
-```
-
-Then open:
-
-- Display: `http://localhost:3000/?kiosk=1`
-- Minimal projector: `http://localhost:3000/?kiosk=2`
-- Fixed runway view: `http://localhost:3000/?view=runway`
-- Fixed overhead view: `http://localhost:3000/?view=overhead`
-
-For development with hot reload:
-
-```bash
-DATA_SOURCE=api corepack pnpm dev
-```
-
-## Deploy
-
-The hosted display is a Vite build with small Vercel functions for live aircraft,
-weather, and satellite data.
-
-```bash
-vercel deploy -y
-```
-
-No API keys are required for the public feeds currently used by the display.
-
-## Checks
-
-```bash
-corepack pnpm typecheck
-corepack pnpm test
-corepack pnpm build
-```
-
-## Relevant project areas
-
-- `web/src/display/` — canvas renderer, alternating views, and live flight-deck panel.
-- `web/src/styles/display.css` — TV layout and visual treatment.
-- `api/` — hosted aircraft, weather, and TLE endpoints.
-- `shared/` — Melbourne runway data, celestial calculations, and projection math.
-- `server/` — optional local server and live WebSocket feed.
-
 ## License and attribution
 
 The original Skylight project is by [Chris Paczek](https://github.com/cpaczek).
