@@ -45,7 +45,7 @@ ssh pi@skylight.local        # or ssh pi@<pi-ip>
 Copy the repo to the Pi and run the installer:
 
 ```bash
-git clone https://github.com/bitpixi2/skylight.git ~/skylight   # or rsync it over
+git clone https://github.com/bitpixi2/melbourne-flight-deck.git ~/skylight   # or rsync it over
 cd ~/skylight
 LAT=-37.670732 LON=144.837898 ./pi-setup/install-on-pi.sh        # MEL/YMML default
 ```

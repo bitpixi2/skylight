@@ -46,7 +46,7 @@ const API_POLL_MS = Number(process.env.API_POLL_MS ?? 4000);
 // Nominatim asks for a descriptive User-Agent identifying the application.
 const GEOCODE_UA =
   process.env.GEOCODE_USER_AGENT ??
-  "skylight-melbourne/0.1 (https://github.com/bitpixi2/skylight)";
+  "skylight-melbourne/0.1 (https://github.com/bitpixi2/melbourne-flight-deck)";
 const CONFIG_PATH = resolve(DATA_DIR, "config.json");
 const SERVER_DEFAULT_CONFIG: Config = {
   ...DEFAULT_CONFIG,
