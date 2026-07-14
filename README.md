@@ -31,11 +31,6 @@ Tap **Expand** after opening the dashboard to request fullscreen mode and a scre
 wake lock. Kiosk 1 keeps the cursor visible and provides the interactive **Runway**,
 **Overhead**, and **Follow** controls.
 
-The airline logo SVGs shown in the dashboard are provided by
-[Soaring Symbols](https://github.com/soaring-symbols/soaring-symbols), created by
-Anh Thang and distributed under the MIT license. Airline names and logos remain
-trademarks of their respective owners.
-
 ### Option 2 — Overhead Projector (About A$150)
 
 ![Brenton's Overhead running as the minimal ceiling projector view](docs/brentons-overhead-projector.png)
