@@ -42,12 +42,11 @@ connection you already have. Open it in either of these ways:
   or a wired HDMI connection where supported.
 
 Features include a live 70 km runway radar, overhead sky, tap-to-follow aircraft,
-current weather, airline logos and the next five flights. Aircraft update about
-every three seconds, with Runway and Overhead views alternating every 45 seconds.
-
-Tap **Expand** after opening the dashboard to request fullscreen mode and a screen
-wake lock. Kiosk 1 keeps the cursor visible and provides the interactive **Runway**,
-**Overhead**, and **Follow** controls.
+current weather, airline logos, and the next five flights. Aircraft positions
+refresh about every three seconds, while Runway and Overhead alternate every 45
+seconds. Tap **Expand** for fullscreen and a screen wake lock; Kiosk 1 keeps the
+cursor visible and includes interactive **Runway**, **Overhead**, and **Follow**
+controls.
 
 ### Option 2 — Overhead Projector (About A$150)
 
