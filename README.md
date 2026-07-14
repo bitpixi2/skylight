@@ -104,8 +104,8 @@ into Kiosk 2, so the projector only needs to provide a reliable HDMI image.
 
 <table width="100%">
   <tr>
-    <th width="50%">Local ADS-B — FlightAware Pro Stick Plus</th>
-    <th width="50%">Airband audio — XHData D-808</th>
+    <th width="50%">Local ADS-B</th>
+    <th width="50%">Airband audio</th>
   </tr>
   <tr>
     <td width="50%" valign="top">
