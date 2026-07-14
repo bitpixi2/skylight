@@ -18,13 +18,13 @@ This is a Melbourne-focused fork of [cpaczek/skylight](https://github.com/cpacze
 
 | Information | Source |
 |---|---|
-| Aircraft positions | [airplanes.live](https://airplanes.live/) public ADS-B feed |
-| Current conditions | [Open-Meteo](https://open-meteo.com/) |
-| Airline SVG catalog | [Soaring Symbols](https://github.com/soaring-symbols/soaring-symbols) |
-| Satellite elements | [CelesTrak](https://celestrak.org/) |
-| Sun, moon, stars and planets | [astronomy-engine](https://github.com/cosinekitty/astronomy) |
-| Satellite positions | [satellite.js](https://github.com/shashwatak/satellite-js) |
-| Melbourne Airport runways | [OurAirports](https://ourairports.com/) |
+| Aircraft positions | <img src="docs/source-icons/airplanes-live.png" alt="airplanes.live favicon" width="18"> [airplanes.live](https://airplanes.live/) public ADS-B feed |
+| Current conditions | <img src="docs/source-icons/open-meteo.png" alt="Open-Meteo favicon" width="18"> [Open-Meteo](https://open-meteo.com/) |
+| Airline SVG catalog | <img src="docs/source-icons/github.png" alt="GitHub favicon" width="18"> [Soaring Symbols](https://github.com/soaring-symbols/soaring-symbols) |
+| Satellite elements | <img src="docs/source-icons/celestrak.png" alt="CelesTrak favicon" width="18"> [CelesTrak](https://celestrak.org/) |
+| Sun, moon, stars and planets | <img src="docs/source-icons/github.png" alt="GitHub favicon" width="18"> [astronomy-engine](https://github.com/cosinekitty/astronomy) |
+| Satellite positions | <img src="docs/source-icons/github.png" alt="GitHub favicon" width="18"> [satellite.js](https://github.com/shashwatak/satellite-js) |
+| Melbourne Airport runways | <img src="docs/source-icons/ourairports.png" alt="OurAirports favicon" width="18"> [OurAirports](https://ourairports.com/) |
 
 ## Display options
 
@@ -60,7 +60,11 @@ constellations, the Moon, planets, satellites and basic details for the nearest
 flight. There are no dashboard panels or visible cursor. It requests a screen
 wake lock immediately and enters fullscreen on its first tap.
 
-[![Kimwood vertical projector showing ceiling-scale projection sizes](docs/kimwood-projector-example.png)](https://www.amazon.com.au/Kimwood-Projector-Bluetooth-Ultra-Projectors/dp/B0G1S78RNM)
+#### Example vertical projector
+
+[Kimwood vertical projector — A$145.99 on Amazon Australia](https://www.amazon.com.au/Kimwood-Projector-Bluetooth-Ultra-Projectors/dp/B0G1S78RNM).
+This inexpensive rotating-projector style is suited to the ceiling setup;
+availability and pricing can change.
 
 ### Option 3 — Overhead Projector Premium
 
