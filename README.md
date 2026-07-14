@@ -14,9 +14,9 @@ fork of
 
 ### Cost at a glance
 
-| **Option 1 — TV dashboard** | **Option 2 — Overhead projector** | **Option 3 — Premium overhead projector** |
+| **TV dashboard** | **Overhead projector** | **Premium projector** |
 |:---:|:---:|:---:|
-| **Free** | **About A$150** | **A$1,800–A$2,000 + curtains** |
+| **Free** | **~A$150** | **A$1.8k–A$2k + curtains** |
 
 <br>
 
