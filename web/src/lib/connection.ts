@@ -54,6 +54,10 @@ export class Connection {
 
   connect(): void {
     this.closed = false;
+    if (import.meta.env.VITE_HOSTED_POLLING === "1") {
+      this.startHostedPolling();
+      return;
+    }
     this.open();
   }
 
