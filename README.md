@@ -100,10 +100,34 @@ into Kiosk 2, so the projector only needs to provide a reliable HDMI image.
 
 #### Optional local receivers
 
-| **Local ADS-B — FlightAware Pro Stick Plus** | **Airband audio — XHData D-808** |
-|---|---|
-| [<img src="docs/flightaware-pro-stick-plus.jpg" alt="FlightAware Pro Stick Plus USB ADS-B receiver" width="100%">](https://core-electronics.com.au/flightaware-pro-stick-plus-usb-sdr-ads-b-receiver.html) | [<img src="docs/xhdata-d808-airband-receiver.jpg" alt="XHData D-808 airband receiver" width="100%">](https://www.tecsunradios.com.au/store/product/xhdata-d-808-lw-mw-sw-fm-airband-receiver/) |
-| **[FlightAware Pro Stick Plus — A$98.75](https://core-electronics.com.au/flightaware-pro-stick-plus-usb-sdr-ads-b-receiver.html)**<br>Sends local 1090 MHz aircraft positions to the Pi.<br>Built-in RF amplifier and 1090 MHz filter.<br>Needs a **[1090 MHz antenna — A$14.70](https://core-electronics.com.au/3dbi-ads-b-1090mhz-sma-antenna-w-magnetic-base-1.html)**. | **[XHData D-808 Airband Radio — A$185](https://www.tecsunradios.com.au/store/product/xhdata-d-808-lw-mw-sw-fm-airband-receiver/)**<br>Plays local 118–137 MHz VHF airband audio.<br>Built-in squelch quiets noise between calls.<br>Runs separately while FlightAware handles ADS-B. |
+<table width="100%">
+  <tr>
+    <th width="50%">Local ADS-B — FlightAware Pro Stick Plus</th>
+    <th width="50%">Airband audio — XHData D-808</th>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="https://core-electronics.com.au/flightaware-pro-stick-plus-usb-sdr-ads-b-receiver.html"><img src="docs/flightaware-pro-stick-plus.jpg" alt="FlightAware Pro Stick Plus USB ADS-B receiver" width="100%"></a>
+    </td>
+    <td width="50%" valign="top">
+      <a href="https://www.tecsunradios.com.au/store/product/xhdata-d-808-lw-mw-sw-fm-airband-receiver/"><img src="docs/xhdata-d808-airband-receiver.jpg" alt="XHData D-808 airband receiver" width="100%"></a>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <strong><a href="https://core-electronics.com.au/flightaware-pro-stick-plus-usb-sdr-ads-b-receiver.html">FlightAware Pro Stick Plus — A$98.75</a></strong><br>
+      Sends local 1090 MHz aircraft positions to the Pi.<br>
+      Built-in RF amplifier and 1090 MHz filter.<br>
+      Needs a <strong><a href="https://core-electronics.com.au/3dbi-ads-b-1090mhz-sma-antenna-w-magnetic-base-1.html">1090 MHz antenna — A$14.70</a></strong>.
+    </td>
+    <td width="50%" valign="top">
+      <strong><a href="https://www.tecsunradios.com.au/store/product/xhdata-d-808-lw-mw-sw-fm-airband-receiver/">XHData D-808 Airband Radio — A$185</a></strong><br>
+      Plays local 118–137 MHz VHF airband audio.<br>
+      Built-in squelch quiets noise between calls.<br>
+      Runs separately while FlightAware handles ADS-B.
+    </td>
+  </tr>
+</table>
 
 Both are optional, receive-only additions, and the public live feeds continue to
 work without them: the FlightAware receiver supplies local aircraft data, while
