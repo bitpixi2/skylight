@@ -1,11 +1,13 @@
 import {
   DEFAULT_CONFIG,
+  MEL_AIRPORT,
   MI_TO_KM,
   RIDDELLS_CREEK_VIEWPOINT,
   type Config,
 } from "@shared/index.js";
 
 const HOME_RADIUS_MILES = 70 / MI_TO_KM;
+const RUNWAY_RADIUS_MILES = 18;
 
 export const PROJECTOR_SKY_CONFIG: Config = {
   ...DEFAULT_CONFIG,
@@ -43,6 +45,10 @@ export const PROJECTOR_SKY_CONFIG: Config = {
 
 export const PROJECTOR_RUNWAY_CONFIG: Config = {
   ...PROJECTOR_SKY_CONFIG,
+  centerLat: MEL_AIRPORT.lat,
+  centerLon: MEL_AIRPORT.lon,
+  locationName: "Melbourne Airport",
+  radiusMiles: RUNWAY_RADIUS_MILES,
   projectionMode: "map",
   mirrorX: false,
   showAirport: true,

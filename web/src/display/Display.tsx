@@ -99,8 +99,12 @@ export function Display() {
   const calibratedProjectorConfig = companion.calibration
     ? {
         ...projectorBaseConfig,
-        centerLat: companion.calibration.lat,
-        centerLon: companion.calibration.lon,
+        // The sky is observer-centred; the runway radar is deliberately
+        // airport-centred so YMML remains large and unmistakable.
+        ...(projectorView === "overhead" ? {
+          centerLat: companion.calibration.lat,
+          centerLon: companion.calibration.lon,
+        } : {}),
         rotationDeg: companion.calibration.rotationDeg,
         mirrorX: companion.calibration.mirrorX,
         mirrorY: companion.calibration.mirrorY,

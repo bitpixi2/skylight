@@ -48,6 +48,7 @@ import {
 } from "@shared/index.js";
 import { classifyGlyph, drawAircraftGlyph, GLYPH_SCALE } from "./aircraftGlyph.js";
 import { computeSky, type Sky, type Tle } from "./celestial.js";
+import { MELBOURNE_MAP_LINES, MELBOURNE_MAP_PLACES } from "./melbourneMap.js";
 import { visibleAsterisms } from "./stars.js";
 import tzLookup from "tz-lookup";
 
@@ -435,6 +436,7 @@ export class Renderer {
 
     this.updateSky(cfg, now);
     this.drawSky(cfg, proj);
+    if (cfg.projectionMode === "map" && cfg.showAirport) this.drawMapContext(cfg, proj);
     this.drawOverlays(cfg, proj);
     if (cfg.showAirport) this.drawAirport(cfg, proj);
 
@@ -506,7 +508,7 @@ export class Renderer {
       for (const entry of visible) {
         if (entry === selectedVisible) {
           entry.alpha = Math.max(entry.alpha, 0.92 * cfg.brightness);
-          entry.sizeScale *= 1.28;
+          entry.sizeScale *= 2.3;
         } else {
           entry.alpha *= 0.24;
         }
@@ -536,6 +538,64 @@ export class Renderer {
     this.drawLabels(cfg, byNear);
 
     if (cfg.theme === "focus" && byNear.length) this.drawDetailPanel(cfg, byNear[0]);
+  }
+
+  // --- Melbourne map: quiet local vectors beneath the radar layer ---
+  private drawMapContext(cfg: Config, proj: ProjOpts): void {
+    const ctx = this.ctx;
+    const gridRgb = hexToRgb(cfg.palette.grid);
+    const textRgb = hexToRgb(cfg.palette.text);
+
+    ctx.save();
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    for (const line of MELBOURNE_MAP_LINES) {
+      const points = line.points.map((point) => this.toScreen(point, cfg, proj));
+      ctx.beginPath();
+      points.forEach((point, index) => index === 0
+        ? ctx.moveTo(point.x, point.y)
+        : ctx.lineTo(point.x, point.y));
+      if (line.kind === "coast") {
+        ctx.strokeStyle = rgba([76, 164, 190], 0.30 * cfg.brightness);
+        ctx.lineWidth = 1.7;
+        ctx.setLineDash([]);
+      } else {
+        ctx.strokeStyle = rgba(gridRgb, 0.24 * cfg.brightness);
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 6]);
+      }
+      ctx.stroke();
+
+      if (line.label) {
+        const anchor = points[Math.floor(points.length / 2)];
+        if (anchor.x > 20 && anchor.x < this.w - 20 && anchor.y > 20 && anchor.y < this.h - 20) {
+          ctx.font = `600 8px ${cfg.fonts.mono}`;
+          ctx.fillStyle = line.kind === "coast"
+            ? rgba([88, 181, 205], 0.46 * cfg.brightness)
+            : rgba(textRgb, 0.24 * cfg.brightness);
+          ctx.textAlign = "center";
+          ctx.textBaseline = "bottom";
+          ctx.fillText(line.label, anchor.x, anchor.y - 4);
+        }
+      }
+    }
+    ctx.setLineDash([]);
+
+    for (const place of MELBOURNE_MAP_PLACES) {
+      const point = this.toScreen(place.point, cfg, proj);
+      if (point.x < 12 || point.x > this.w - 12 || point.y < 12 || point.y > this.h - 12) continue;
+      const major = place.importance === "major";
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, major ? 2.8 : 1.8, 0, Math.PI * 2);
+      ctx.fillStyle = rgba(textRgb, (major ? 0.58 : 0.34) * cfg.brightness);
+      ctx.fill();
+      ctx.font = `${major ? 700 : 500} ${major ? 9 : 8}px ${cfg.fonts.mono}`;
+      ctx.fillStyle = rgba(textRgb, (major ? 0.50 : 0.28) * cfg.brightness);
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.fillText(place.name, point.x + 7, point.y);
+    }
+    ctx.restore();
   }
 
   /**
@@ -682,25 +742,67 @@ export class Renderer {
         const a = this.toScreen(r.le, cfg, proj);
         const b = this.toScreen(r.he, cfg, proj);
         // True runway width in px, nudged up a touch so it stays legible.
-        const wpx = Math.max(3.5, r.widthFt * FT_TO_M * proj.pxPerM * 1.4);
+        const wpx = Math.max(6, r.widthFt * FT_TO_M * proj.pxPerM * 1.8);
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const length = Math.max(1, Math.hypot(dx, dy));
+        const ux = dx / length;
+        const uy = dy / length;
+        const px = -uy;
+        const py = ux;
 
         ctx.save();
         ctx.lineCap = "butt";
+        // Approach axes make the runway alignment readable at projector scale.
+        ctx.strokeStyle = rgba(rwyRgb, 0.30 * cfg.brightness);
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 7]);
+        ctx.beginPath();
+        ctx.moveTo(a.x - ux * 42, a.y - uy * 42);
+        ctx.lineTo(a.x, a.y);
+        ctx.moveTo(b.x, b.y);
+        ctx.lineTo(b.x + ux * 42, b.y + uy * 42);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // Fine outline separates the real runway shape from the map layer.
+        ctx.strokeStyle = rgba([86, 64, 26], 0.72 * cfg.brightness);
+        ctx.lineWidth = wpx + 4;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
         // Asphalt body.
-        ctx.strokeStyle = rgba(rwyRgb, 0.42 * cfg.brightness);
+        ctx.strokeStyle = rgba(rwyRgb, 0.76 * cfg.brightness);
         ctx.lineWidth = wpx;
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
         ctx.lineTo(b.x, b.y);
         ctx.stroke();
         // Dashed centerline.
-        ctx.strokeStyle = rgba([255, 231, 168], 0.55 * cfg.brightness);
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = rgba([255, 238, 190], 0.88 * cfg.brightness);
+        ctx.lineWidth = 1.3;
         ctx.setLineDash([6, 6]);
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
         ctx.lineTo(b.x, b.y);
         ctx.stroke();
+
+        // Threshold bars and the real runway end identifiers.
+        ctx.setLineDash([]);
+        ctx.strokeStyle = rgba([255, 238, 190], 0.90 * cfg.brightness);
+        ctx.lineWidth = 1.5;
+        for (const end of [a, b]) {
+          ctx.beginPath();
+          ctx.moveTo(end.x - px * (wpx / 2), end.y - py * (wpx / 2));
+          ctx.lineTo(end.x + px * (wpx / 2), end.y + py * (wpx / 2));
+          ctx.stroke();
+        }
+        ctx.font = `800 10px ${cfg.fonts.mono}`;
+        ctx.fillStyle = rgba([255, 231, 168], 0.92 * cfg.brightness);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(r.leIdent, a.x - ux * 12 + px * 10, a.y - uy * 12 + py * 10);
+        ctx.fillText(r.heIdent, b.x + ux * 12 + px * 10, b.y + uy * 12 + py * 10);
         ctx.restore();
 
         cx += (a.x + b.x) / 2;
@@ -721,7 +823,7 @@ export class Renderer {
         } catch {
           /* noop */
         }
-        ctx.fillText(ap.name, cx, cy);
+        ctx.fillText(`${ap.name} · ${ap.icao}`, cx, cy - 42);
         try {
           ctx.letterSpacing = "0px";
         } catch {
@@ -1178,7 +1280,7 @@ export class Renderer {
     if (this.selectedHex === v.tr.ac.hex) {
       const pulse = 1 + Math.sin(this.frameT * 3.2) * 0.08;
       ctx.beginPath();
-      ctx.arc(0, 0, s * 2.35 * pulse, 0, Math.PI * 2);
+      ctx.arc(0, 0, s * 1.35 * pulse, 0, Math.PI * 2);
       ctx.strokeStyle = rgba(hexToRgb(cfg.palette.accent), 0.72 * v.alpha);
       ctx.lineWidth = 1.8;
       ctx.setLineDash([5, 7]);
@@ -1269,7 +1371,7 @@ export class Renderer {
 
     const { w, lh, h } = this.measureLabel(cfg, lines);
 
-    const gap = cfg.glyphSizePx * 0.7 + 9;
+    const gap = cfg.glyphSizePx * v.sizeScale * 0.7 + 9;
     const onScreen = (b: { x: number; y: number; w: number; h: number }) =>
       b.x >= 6 && b.x + b.w <= this.w - 6 && b.y >= 6 && b.y + b.h <= this.h - 6;
 
