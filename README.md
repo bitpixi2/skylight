@@ -66,7 +66,9 @@ The airline logo SVGs shown in the dashboard are provided by
 Anh Thang and distributed under the MIT license. Airline names and logos remain
 trademarks of their respective owners.
 
-### Option 2 — Minimal ceiling projector
+### Option 2 — Overhead Projector
+
+![Brenton's Overhead running as the minimal ceiling projector view](docs/brentons-overhead-projector.png)
 
 Open the [public Kiosk 2 projector](https://brentons-overhead.vercel.app) for the
 separate ceiling presentation. It keeps only the full-screen overhead aircraft
