@@ -27,7 +27,8 @@ export const PROJECTOR_SKY_CONFIG: Config = {
   showPlanets: true,
   showDestArc: false,
   showRouteDetail: false,
-  glyphSizePx: 28,
+  glyphSizePx: 32,
+  textScale: 1.22,
   trailSeconds: 75,
   trailOpacity: 0.72,
   labelDensity: "nearestOnly",
@@ -38,7 +39,7 @@ export const PROJECTOR_SKY_CONFIG: Config = {
     altitude: true,
     speed: true,
     verticalRate: false,
-    destination: false,
+    destination: true,
     registration: false,
   },
 };

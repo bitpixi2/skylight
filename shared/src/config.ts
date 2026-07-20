@@ -288,6 +288,8 @@ export interface Config {
   palette: Palette;
   fonts: Fonts;
   glyphSizePx: number;
+  /** Multiplier for canvas labels and telemetry. Keep at 1 for the dashboard. */
+  textScale: number;
   /** Color the glyph by altitude. */
   altitudeColor: boolean;
   trailSeconds: number;
@@ -392,6 +394,7 @@ export const DEFAULT_CONFIG: Config = {
     mono: "'JetBrains Mono', ui-monospace, monospace",
   },
   glyphSizePx: 22,
+  textScale: 1,
   altitudeColor: true,
   trailSeconds: 45,
   trailOpacity: 0.55,

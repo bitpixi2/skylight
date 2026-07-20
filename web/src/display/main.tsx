@@ -8,6 +8,16 @@ if (projectorRequested()) {
   document.title = import.meta.env.VITE_COMPANION_ENABLED === "1"
     ? "Brenton's Ceiling Projector — Option 4"
     : "Brenton's Overhead — Live Aircraft";
+
+  const manifest = document.createElement("link");
+  manifest.rel = "manifest";
+  manifest.href = "/overhead.webmanifest";
+  document.head.appendChild(manifest);
+
+  const theme = document.createElement("meta");
+  theme.name = "theme-color";
+  theme.content = "#000000";
+  document.head.appendChild(theme);
 }
 
 createRoot(document.getElementById("root")!).render(

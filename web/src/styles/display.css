@@ -54,6 +54,22 @@ body,
   background: #000;
 }
 
+.projector-fullscreen-prompt {
+  position: fixed;
+  z-index: 7;
+  left: 50%;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  padding: 12px 18px;
+  color: rgba(232, 247, 249, 0.9);
+  background: rgba(2, 13, 17, 0.78);
+  border: 1px solid rgba(109, 228, 239, 0.32);
+  border-radius: 999px;
+  font: 700 14px/1 "JetBrains Mono", ui-monospace, monospace;
+  letter-spacing: 0.04em;
+  transform: translateX(-50%);
+  cursor: pointer !important;
+}
+
 .projector-link-status {
   position: fixed;
   z-index: 5;

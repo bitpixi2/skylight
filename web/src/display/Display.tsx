@@ -290,6 +290,15 @@ export function Display() {
             className="display-canvas projector-canvas"
             aria-label="Live overhead aircraft projector view"
           />
+          {!ambient.fullscreen && (
+            <button
+              type="button"
+              className="projector-fullscreen-prompt"
+              onClick={() => void ambient.enter()}
+            >
+              Tap anywhere for full screen
+            </button>
+          )}
           {companionEnabled && (
             <ProjectorPairing
               pairUrl={companion.pairUrl}

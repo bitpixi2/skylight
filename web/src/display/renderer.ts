@@ -147,6 +147,14 @@ export function labelLines(cfg: Config, ac: Aircraft): { text: string; kind: "ti
     : null;
   if (title) out.push({ text: title, kind: "title" });
 
+  // A verified route belongs immediately beneath the flight number. This is
+  // the most useful second line on a ceiling and keeps it readable at a glance.
+  if (f.destination && ac.destination && routePlausible(ac, cfg)) {
+    const origin = cfg.locationDisplay === "name" && ac.originName ? ac.originName : ac.origin ?? "";
+    const destination = cfg.locationDisplay === "name" && ac.destName ? ac.destName : ac.destination;
+    out.push({ text: [origin, destination].filter(Boolean).join(" → "), kind: "sub" });
+  }
+
   const sub: string[] = [];
   if (f.type && (ac.typeName || ac.typeCode)) sub.push(ac.typeName ?? ac.typeCode!);
   const alt = ac.altBaro ?? ac.altGeom;
@@ -158,10 +166,6 @@ export function labelLines(cfg: Config, ac: Aircraft): { text: string; kind: "ti
   if (sub.length) out.push({ text: sub.join("   "), kind: "sub" });
 
   if (f.destination && ac.destination && routePlausible(ac, cfg)) {
-    const origin = cfg?.locationDisplay === "name" && ac.originName ? ac.originName : ac.origin ?? "";
-    const destination = cfg?.locationDisplay === "name" && ac.destName ? ac.destName : ac.destination ?? "";
-    out.push({ text: [origin, destination].join(' → '), kind: "sub" });
-
     if (cfg.showRouteDetail && ac.destLat != null && ac.destLon != null) {
       const bits: string[] = [`${localTimeAt(ac.destLat, ac.destLon)} local`];
       if (ac.lat != null && ac.lon != null) {
@@ -177,6 +181,9 @@ export function labelLines(cfg: Config, ac: Aircraft): { text: string; kind: "ti
 
 const rgba = (c: [number, number, number], a: number) =>
   `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
+
+/** Projector presets can enlarge every canvas label without changing TV UI. */
+const textPx = (cfg: Config, base: number) => Math.round(base * (cfg.textScale ?? 1) * 10) / 10;
 
 interface Visible {
   tr: Track;
@@ -569,7 +576,7 @@ export class Renderer {
       if (line.label) {
         const anchor = points[Math.floor(points.length / 2)];
         if (anchor.x > 20 && anchor.x < this.w - 20 && anchor.y > 20 && anchor.y < this.h - 20) {
-          ctx.font = `600 8px ${cfg.fonts.mono}`;
+          ctx.font = `600 ${textPx(cfg, 8)}px ${cfg.fonts.mono}`;
           ctx.fillStyle = line.kind === "coast"
             ? rgba([88, 181, 205], 0.46 * cfg.brightness)
             : rgba(textRgb, 0.24 * cfg.brightness);
@@ -589,7 +596,7 @@ export class Renderer {
       ctx.arc(point.x, point.y, major ? 2.8 : 1.8, 0, Math.PI * 2);
       ctx.fillStyle = rgba(textRgb, (major ? 0.58 : 0.34) * cfg.brightness);
       ctx.fill();
-      ctx.font = `${major ? 700 : 500} ${major ? 9 : 8}px ${cfg.fonts.mono}`;
+      ctx.font = `${major ? 700 : 500} ${textPx(cfg, major ? 9 : 8)}px ${cfg.fonts.mono}`;
       ctx.fillStyle = rgba(textRgb, (major ? 0.50 : 0.28) * cfg.brightness);
       ctx.textAlign = "left";
       ctx.textBaseline = "middle";
@@ -667,7 +674,7 @@ export class Renderer {
           ctx.stroke();
         }
         ctx.setLineDash([]);
-        ctx.font = `300 9px ${cfg.fonts.mono}`;
+        ctx.font = `300 ${textPx(cfg, 9)}px ${cfg.fonts.mono}`;
         ctx.fillStyle = rgba(hexToRgb(cfg.palette.text), 0.22 * cfg.brightness);
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
@@ -699,7 +706,7 @@ export class Renderer {
 
     if (cfg.compass) {
       ctx.save();
-      ctx.font = `300 12px ${cfg.fonts.label}`;
+      ctx.font = `300 ${textPx(cfg, 12)}px ${cfg.fonts.label}`;
       ctx.fillStyle = rgba(hexToRgb(cfg.palette.text), 0.32 * cfg.brightness);
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
@@ -797,7 +804,7 @@ export class Renderer {
           ctx.lineTo(end.x + px * (wpx / 2), end.y + py * (wpx / 2));
           ctx.stroke();
         }
-        ctx.font = `800 10px ${cfg.fonts.mono}`;
+        ctx.font = `800 ${textPx(cfg, 10)}px ${cfg.fonts.mono}`;
         ctx.fillStyle = rgba([255, 231, 168], 0.92 * cfg.brightness);
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -814,7 +821,7 @@ export class Renderer {
         cx /= n;
         cy /= n;
         ctx.save();
-        ctx.font = `700 12px ${cfg.fonts.mono}`;
+        ctx.font = `700 ${textPx(cfg, 12)}px ${cfg.fonts.mono}`;
         ctx.fillStyle = rgba(rwyRgb, 0.8 * cfg.brightness);
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -1061,7 +1068,7 @@ export class Renderer {
     const ctx = this.ctx;
     this.withLabelRotation(cfg, p.x, p.y, () => {
       ctx.save();
-      ctx.font = `300 10px ${cfg.fonts.label}`;
+      ctx.font = `300 ${textPx(cfg, 10)}px ${cfg.fonts.label}`;
       ctx.fillStyle = color;
       ctx.globalAlpha = alpha;
       ctx.textAlign = align;
@@ -1084,7 +1091,7 @@ export class Renderer {
 
   private measureSkyLabel(text: string, cfg: Config): { w: number; h: number } {
     const ctx = this.ctx;
-    ctx.font = `300 10px ${cfg.fonts.label}`;
+    ctx.font = `300 ${textPx(cfg, 10)}px ${cfg.fonts.label}`;
     try {
       ctx.letterSpacing = "1px";
     } catch {
@@ -1096,7 +1103,7 @@ export class Renderer {
     } catch {
       /* noop */
     }
-    return { w: w + 2, h: 12 };
+    return { w: w + 2, h: textPx(cfg, 12) };
   }
 
   private skyLabelBox(
@@ -1325,10 +1332,13 @@ export class Renderer {
     lines: { text: string; kind: "title" | "sub" }[],
   ): { w: number; lh: number; h: number } {
     const ctx = this.ctx;
-    const lh = 16;
+    const scale = cfg.textScale ?? 1;
+    const titlePx = 14 * scale;
+    const subPx = 11 * scale;
+    const lh = 16 * scale;
     let w = 0;
     for (const ln of lines) {
-      ctx.font = ln.kind === "title" ? `500 14px ${cfg.fonts.label}` : `400 11px ${cfg.fonts.label}`;
+      ctx.font = ln.kind === "title" ? `500 ${titlePx}px ${cfg.fonts.label}` : `400 ${subPx}px ${cfg.fonts.label}`;
       try {
         ctx.letterSpacing = ln.kind === "title" ? "1.5px" : "0.5px";
       } catch {
@@ -1423,11 +1433,14 @@ export class Renderer {
       ctx.lineWidth = 3;
       ctx.lineJoin = "round";
 
+      const scale = cfg.textScale ?? 1;
+      const titlePx = 14 * scale;
+      const subPx = 11 * scale;
       let y = box.y;
       let lastLineKind;
       for (const ln of lines) {
         if (ln.kind === "title") {
-          ctx.font = `500 14px ${cfg.fonts.label}`;
+          ctx.font = `500 ${titlePx}px ${cfg.fonts.label}`;
           ctx.fillStyle = rgba([245, 247, 255], a);
           try {
             ctx.letterSpacing = "1.5px";
@@ -1435,7 +1448,7 @@ export class Renderer {
             /* noop */
           }
         } else {
-          ctx.font = `400 11px ${cfg.fonts.label}`;
+          ctx.font = `400 ${subPx}px ${cfg.fonts.label}`;
           ctx.fillStyle = rgba(hexToRgb(cfg.palette.text), 0.82 * a);
           try {
             ctx.letterSpacing = "0.5px";
@@ -1486,8 +1499,9 @@ export class Renderer {
       /* noop */
     }
 
+    const scale = cfg.textScale ?? 1;
     const flightText = ac.flight ?? ac.hex.toUpperCase();
-    ctx.font = `300 34px ${cfg.fonts.label}`;
+    ctx.font = `300 ${34 * scale}px ${cfg.fonts.label}`;
     ctx.fillStyle = rgba([245, 247, 255], v.alpha);
     ctx.strokeText(flightText, x, y);
     ctx.fillText(flightText, x, y);
@@ -1497,7 +1511,7 @@ export class Renderer {
       /* noop */
     }
 
-    ctx.font = `400 15px ${cfg.fonts.label}`;
+    ctx.font = `400 ${15 * scale}px ${cfg.fonts.label}`;
     ctx.fillStyle = rgba(hexToRgb(cfg.palette.text), 0.85 * v.alpha);
     const dpAlt = ac.altBaro ?? ac.altGeom;
     const bits = [
