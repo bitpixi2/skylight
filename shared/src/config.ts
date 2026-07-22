@@ -303,6 +303,8 @@ export interface Config {
   nearestN: number;
   /** Seconds between highlighted aircraft labels; 0 keeps labels static. */
   labelCycleSeconds: number;
+  /** Put the verified route after the type/telemetry line instead of after the title. */
+  routeBelowType: boolean;
   showFields: ShowFields;
   nameDisplay: NameDisplay;
   locationDisplay: LocationDisplay;
@@ -405,6 +407,7 @@ export const DEFAULT_CONFIG: Config = {
   labelDensity: "all",
   nearestN: 5,
   labelCycleSeconds: 0,
+  routeBelowType: false,
   showFields: {
     name: true,
     type: true,

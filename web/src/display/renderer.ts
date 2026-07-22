@@ -152,13 +152,13 @@ export function labelLines(cfg: Config, ac: Aircraft): { text: string; kind: "ti
     : null;
   if (title) out.push({ text: title, kind: "title" });
 
-  // A verified route belongs immediately beneath the flight number. This is
-  // the most useful second line on a ceiling and keeps it readable at a glance.
+  let verifiedRoute: string | null = null;
   if (f.destination && ac.destination && routePlausible(ac, cfg)) {
     const origin = cfg.locationDisplay === "name" && ac.originName ? ac.originName : ac.origin ?? "";
     const destination = cfg.locationDisplay === "name" && ac.destName ? ac.destName : ac.destination;
-    out.push({ text: [origin, destination].filter(Boolean).join(" → "), kind: "sub" });
+    verifiedRoute = [origin, destination].filter(Boolean).join(" → ");
   }
+  if (verifiedRoute && !cfg.routeBelowType) out.push({ text: verifiedRoute, kind: "sub" });
 
   const sub: string[] = [];
   if (f.type && (ac.typeName || ac.typeCode)) sub.push(ac.typeName ?? ac.typeCode!);
@@ -169,8 +169,9 @@ export function labelLines(cfg: Config, ac: Aircraft): { text: string; kind: "ti
   }
   if (f.speed && ac.gs != null) sub.push(formatSpeed(ac.gs, cfg.speedUnit));
   if (sub.length) out.push({ text: sub.join("   "), kind: "sub" });
+  if (verifiedRoute && cfg.routeBelowType) out.push({ text: verifiedRoute, kind: "sub" });
 
-  if (f.destination && ac.destination && routePlausible(ac, cfg)) {
+  if (verifiedRoute) {
     if (cfg.showRouteDetail && ac.destLat != null && ac.destLon != null) {
       const bits: string[] = [`${localTimeAt(ac.destLat, ac.destLon)} local`];
       if (ac.lat != null && ac.lon != null) {
@@ -930,9 +931,9 @@ export class Renderer {
           skyLabels.push({
             p,
             name: s.name,
-            color: "#AEB6C6",
+            color: "#C9D0DC",
             size,
-            alpha: 0.5 * b,
+            alpha: 0.64 * b,
             priority: mag,
           });
         }

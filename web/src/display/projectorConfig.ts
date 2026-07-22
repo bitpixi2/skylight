@@ -34,6 +34,8 @@ export const PROJECTOR_SKY_CONFIG: Config = {
   labelDensity: "nearestOnly",
   nearestN: 6,
   labelCycleSeconds: 12,
+  routeBelowType: true,
+  locationDisplay: "iata",
   showFields: {
     name: true,
     type: true,

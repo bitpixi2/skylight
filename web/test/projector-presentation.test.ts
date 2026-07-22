@@ -13,7 +13,7 @@ describe("overhead projector presentation", () => {
     expect(DEFAULT_CONFIG.labelCycleSeconds).toBe(0);
   });
 
-  it("places a verified airport route directly below the flight number", () => {
+  it("places a verified IATA route beneath the aircraft type", () => {
     const aircraft = {
       hex: "7c0001",
       flight: "QF432",
@@ -31,8 +31,8 @@ describe("overhead projector presentation", () => {
     const lines = labelLines(PROJECTOR_SKY_CONFIG, aircraft);
     expect(lines).toEqual([
       { text: "QF432", kind: "title" },
-      { text: "MEL → SYD", kind: "sub" },
       { text: "Boeing 737-800", kind: "sub" },
+      { text: "MEL → SYD", kind: "sub" },
     ]);
   });
 });
