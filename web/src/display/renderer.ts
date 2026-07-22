@@ -199,9 +199,20 @@ interface Visible {
   heading: number;
   rangeMi: number;
   alpha: number;
+  viewportFade: number;
   color: [number, number, number];
   emergency: boolean;
   sizeScale: number;
+}
+
+/** Fade a glyph before its body or glow is clipped by the viewport edge. */
+export function viewportGlyphFade(p: Point, extent: number, width: number, height: number): number {
+  if (extent <= 0) return 1;
+  const clearance = Math.min(p.x, p.y, width - p.x, height - p.y);
+  const start = extent * 0.25;
+  const end = extent * 1.1;
+  const linear = clamp01((clearance - start) / Math.max(1, end - start));
+  return linear * linear * (3 - 2 * linear);
 }
 
 export class Renderer {
@@ -504,14 +515,17 @@ export class Renderer {
         cfg.projectionMode === "sky" && sky
           ? clamp01(sky.elev / 6) * clamp01((cfg.radiusMiles - rangeMi) / (cfg.radiusMiles * 0.14))
           : clamp01((cfg.radiusMiles - rangeMi) / (cfg.radiusMiles * 0.14));
-      const alpha = clamp01(edgeFade) * tr.life * cfg.brightness;
       const alt = sample.altFt;
       const color = cfg.altitudeColor ? altRamp(alt) : hexToRgb(cfg.palette.glyph);
       const emergency = cfg.highlightEmergency && !!tr.ac.squawk && EMERGENCY_SQUAWKS.has(tr.ac.squawk);
       const sizeScale =
         cfg.projectionMode === "sky" && sky ? skyGlyphScale(sky.slantM) : 1;
+      const kind = classifyGlyph(tr.ac);
+      const glyphExtent = cfg.glyphSizePx * GLYPH_SCALE[kind] * sizeScale * 1.7;
+      const viewportFade = viewportGlyphFade(p, glyphExtent, this.w, this.h);
+      const alpha = clamp01(edgeFade) * viewportFade * tr.life * cfg.brightness;
 
-      visible.push({ tr, sample, sky, p, heading, rangeMi, alpha, color, emergency, sizeScale });
+      visible.push({ tr, sample, sky, p, heading, rangeMi, alpha, viewportFade, color, emergency, sizeScale });
     }
 
     const selectedVisible = this.selectedHex
@@ -520,7 +534,7 @@ export class Renderer {
     if (selectedVisible) {
       for (const entry of visible) {
         if (entry === selectedVisible) {
-          entry.alpha = Math.max(entry.alpha, 0.92 * cfg.brightness);
+          entry.alpha = Math.max(entry.alpha, 0.92 * cfg.brightness * entry.viewportFade);
           entry.sizeScale *= 2.3;
         } else {
           entry.alpha *= 0.24;
@@ -1418,7 +1432,7 @@ export class Renderer {
     if (!lines.length) return;
     const cycling = cfg.labelCycleSeconds > 0;
     const a = cycling
-      ? Math.max(v.alpha, 0.9 * cfg.brightness) * strength
+      ? Math.max(v.alpha, 0.9 * cfg.brightness * v.viewportFade) * strength
       : v.alpha * strength;
     if (a < 0.04) return;
 

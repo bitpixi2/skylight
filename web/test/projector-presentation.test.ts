@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_CONFIG, type Aircraft } from "@shared/index.js";
-import { labelLines } from "../src/display/renderer.js";
+import { labelLines, viewportGlyphFade } from "../src/display/renderer.js";
 import { PROJECTOR_SKY_CONFIG } from "../src/display/projectorConfig.js";
 
 describe("overhead projector presentation", () => {
@@ -36,5 +36,12 @@ describe("overhead projector presentation", () => {
       { text: "Boeing 737-800", kind: "sub" },
       { text: "MEL → SYD", kind: "sub" },
     ]);
+  });
+
+  it("fades aircraft before their glyph is clipped by the projector edge", () => {
+    expect(viewportGlyphFade({ x: 640, y: 360 }, 55, 1280, 720)).toBe(1);
+    expect(viewportGlyphFade({ x: 35, y: 360 }, 55, 1280, 720)).toBeGreaterThan(0);
+    expect(viewportGlyphFade({ x: 35, y: 360 }, 55, 1280, 720)).toBeLessThan(1);
+    expect(viewportGlyphFade({ x: 0, y: 360 }, 55, 1280, 720)).toBe(0);
   });
 });
