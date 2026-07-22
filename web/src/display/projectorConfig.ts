@@ -69,3 +69,31 @@ export const PROJECTOR_RUNWAY_CONFIG: Config = {
   nearestN: 3,
   labelCycleSeconds: 0,
 };
+
+/**
+ * Keep the interactive kiosk useful from across the room without annotating
+ * every aircraft at once. This mirrors the overhead projector's restrained
+ * three-line label while preserving the kiosk's map and controls.
+ */
+export function kioskPanelPresentation(base: Config, following: boolean): Config {
+  return {
+    ...base,
+    textScale: Math.max(base.textScale ?? 1, 1.18),
+    labelDensity: "nearestOnly",
+    nearestN: 6,
+    labelCycleSeconds: following ? 0 : 12,
+    routeBelowType: true,
+    locationDisplay: "iata",
+    showRouteDetail: false,
+    showFields: {
+      ...base.showFields,
+      name: true,
+      type: true,
+      altitude: false,
+      speed: false,
+      verticalRate: false,
+      destination: true,
+      registration: false,
+    },
+  };
+}

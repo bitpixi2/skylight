@@ -17,7 +17,11 @@ import { FlightDeck, type DeckView, type WideDeckView } from "./FlightDeck.js";
 import { Renderer } from "./renderer.js";
 import { ProjectorPairing } from "../companion/ProjectorPairing.js";
 import { useProjectorCompanion } from "../companion/useCompanion.js";
-import { PROJECTOR_RUNWAY_CONFIG, PROJECTOR_SKY_CONFIG } from "./projectorConfig.js";
+import {
+  PROJECTOR_RUNWAY_CONFIG,
+  PROJECTOR_SKY_CONFIG,
+  kioskPanelPresentation,
+} from "./projectorConfig.js";
 
 const THEMES: Theme[] = ["ambient", "telemetry", "focus"];
 const VIEW_SECONDS = 45;
@@ -56,6 +60,7 @@ export function Display() {
   const { state, conn } = useStream("display");
   const ambient = useAmbientMode();
   const projectorMode = projectorRequested();
+  const panelFullscreen = kioskPanelFullscreenRequested();
   // Pairing is opt-in so the original Brenton's Overhead deployment remains
   // a completely clean, standalone ceiling. Only the Option 4 projector build
   // sets this flag.
@@ -116,10 +121,14 @@ export function Display() {
         mirrorY: companion.calibration.mirrorY,
       }
     : projectorBaseConfig;
+  const personalDeckConfig = followConfig
+    ?? (deckView === "overhead" ? RIDDELLS_SKY_CONFIG : RIDDELLS_AIRSPACE_CONFIG);
   const displayConfig = projectorMode
     ? calibratedProjectorConfig
     : personalDeck
-      ? followConfig ?? (deckView === "overhead" ? RIDDELLS_SKY_CONFIG : RIDDELLS_AIRSPACE_CONFIG)
+      ? panelFullscreen
+        ? kioskPanelPresentation(personalDeckConfig, deckView === "focus")
+        : personalDeckConfig
       : (state.config ?? DEFAULT_CONFIG);
 
   // Keep the latest config in a ref so the RAF loop always reads fresh values.
@@ -127,7 +136,6 @@ export function Display() {
   configRef.current = displayConfig;
 
   // Latest ambient toggle in a ref so the keydown listener stays subscribed once.
-  const panelFullscreen = kioskPanelFullscreenRequested();
   const toggleFullscreen = () => ambient.toggle(panelFullscreen ? radarPanelRef.current : null);
   const ambientToggleRef = useRef<() => void>(toggleFullscreen);
   ambientToggleRef.current = toggleFullscreen;
